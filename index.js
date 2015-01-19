@@ -3,7 +3,9 @@ function build(d, v, flags, buildDir) {
 
     buildDir = (buildDir || 'build') + '/';
 
-    var requirejs = require('requirejs'),
+    var include = flags['--include'] || flags['-i'],
+        fpath = require('path'),
+        requirejs = require('requirejs'),
         colors = v.require('colors'),
         Q = v.require('q'),
         files = {},
@@ -84,7 +86,7 @@ function build(d, v, flags, buildDir) {
             cts;
 
         function manageImports(moduleName, path, contents) {
-            path = require('path').relative('src', path);
+            path = fpath.relative('src', path);
             if (file.deps && file.deps.length) {
                 var pattern = new RegExp('@(' + file.deps.join('|') + ')', 'gi');
                 contents = contents.replace(pattern, function (m, f) {
@@ -123,7 +125,7 @@ function build(d, v, flags, buildDir) {
 
         if (file.name.match('.js')) {
             if (!file.amd) {
-                cts = manageImports(null, require('path').resolve('./src', file.name), file.contents);
+                cts = manageImports(null, fpath.resolve('./src', file.name), file.contents);
                 v.write(tmpDir + '/' + file.vName, cts);
                 uglifyJS({path: tmpDir + '/' + file.vName});
             } else {
@@ -154,7 +156,18 @@ function build(d, v, flags, buildDir) {
                 v.write(buildDir + files[k].vName, files[k].contents);
             }
         });
-        d.resolve(colors.rainbow('Project successfully built!'));
+        if (include) {
+            Q.all(include.split(',').map(function (path) {
+                console.log('including %s to build directory', path);
+                return v.exec('cp -r ' + path + ' ' + buildDir + '/' + fpath.relative('src', path));
+            }))
+            .then(function () {
+                d.resolve(colors.rainbow('Project successfully built!'));
+            })
+            .catch(d.reject);
+        } else {
+            d.resolve(colors.rainbow('Project successfully built!'));
+        }
     }
 
     function handleFile(filename, amd) {
@@ -204,8 +217,8 @@ function build(d, v, flags, buildDir) {
         }
 
         if (attrs[source]) {
-            //skip src having :// or // (urls)
-            if (attrs[source].match(/:?\/\//)) {
+            //skip src having :// or // (urls) or not html,js,less
+            if (attrs[source].match(/:?\/\//) || !attrs[source].match(/\.(js|less|html)/)) {
                 df.resolve(tag);
                 return df.promise;
             }
