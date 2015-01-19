@@ -13,7 +13,7 @@ function build(d, v, flags, buildDir) {
         dependencies = {};
 
     function createTmpDir() {
-        return v.exec('mktemp -dt boilerplate').then(function (p) {
+        return v.exec('mktemp -dt XXXXXX').then(function (p) {
             tmpDir =  p.replace(/\n/, '');
             return tmpDir;
         });
@@ -162,11 +162,11 @@ function build(d, v, flags, buildDir) {
                 return v.exec('cp -r ' + path + ' ' + buildDir + '/' + fpath.relative('src', path));
             }))
             .then(function () {
-                d.resolve(colors.rainbow('Project successfully built!'));
+                d.resolve(colors.rainbow('Project successfully built to ' + buildDir));
             })
             .catch(d.reject);
         } else {
-            d.resolve(colors.rainbow('Project successfully built!'));
+            d.resolve(colors.rainbow('Project successfully built to ' + buildDir));
         }
     }
 
@@ -193,7 +193,25 @@ function build(d, v, flags, buildDir) {
             file = attrs['data-main'] || attrs[source];
 
         if (attrs['data-dev']) { df.resolve(''); return df.promise; }
-        if (!file) { df.resolve(tag); return df.promise; }
+        if (!file) {
+            tag = tag.replace('/less', '');
+            var match = tag.match(/([\w\.-]+\.less)/g);
+            // find and replace less src in files in case no
+            // source is provided
+            if (match) {
+                Q.all(match.map(function (m) {
+                    return handleFile(m).then(function (info) {
+                        info.build = true;
+                        tag = tag.replace(m, info.vName);
+                    });
+                }))
+                .then(function () { df.resolve(tag); })
+                .fail(d.reject);
+            } else {
+                df.resolve(tag);
+            }
+            return df.promise;
+        }
         if (!/\.\w+$/.test(file)) { file += '.js';}
 
         if (attrs['data-inline']) {
