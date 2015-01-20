@@ -14,8 +14,12 @@
     "url": "git@github.com:zanona/volo-pack.git"
   },
   "dependencies": {
+    "clean-css": "^3.0.6",
+    "exec-sync": "^0.1.6",
     "less": "^2.2.0",
-    "requirejs": "^2.1.15"
+    "q": "^1.1.2",
+    "requirejs": "^2.1.15",
+    "uglify-js": "^2.4.16"
   },
   "bugs": {
     "url": "https://github.com/zanona/volo-pack/issues"
@@ -25,13 +29,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "licenses": [
-      {
-          "type": "BSD",
-          "url": "https://github.com/zanona/volo-pack/blob/master/LICENSE"
-      },
-      {
-          "type": "MIT",
-          "url": "https://github.com/zanona/volo-pack/blob/master/LICENSE"
-      }
+    {
+      "type": "BSD",
+      "url": "https://github.com/zanona/volo-pack/blob/master/LICENSE"
+    },
+    {
+      "type": "MIT",
+      "url": "https://github.com/zanona/volo-pack/blob/master/LICENSE"
+    }
   ]
 }
