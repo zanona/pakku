@@ -1,12 +1,12 @@
 /*global require, module, console, process*/
 /*eslint no-console:0*/
-function main(d, v, flags, index, buildDir) {
+module.exports = function(index, buildDir) {
     'use strict';
 
-    var path = require('path'),
-        colors = v.require('colors'),
-        cache = {},
+    var cache = {},
         queue = [],
+        path = require('path'),
+        colors = require('colors'),
         min = {
             html: require('./min/html'),
             css: require('./min/css'),
@@ -52,7 +52,7 @@ function main(d, v, flags, index, buildDir) {
             .tap(function  () { console.log('SAVING FILES…'.blue); })
             .then(function () { return build(t.build); })
             .then(function () { console.log('PROCESS FINISHED'.rainbow); })
-            .catch(d.reject);
+            .catch(function (e) { throw e; });
     }
 
     function onResource(file) {
@@ -84,8 +84,4 @@ function main(d, v, flags, index, buildDir) {
         .on('ready', onFileComplete)
         .on('error', onFileError)
         .parse({name: index, type: 'html'});
-}
-module.exports = {
-    summary: 'Build production version of project',
-    run: main
 };
