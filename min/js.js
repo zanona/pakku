@@ -1,14 +1,16 @@
-/*global module, require, console, process*/
-/*eslint no-console:0*/
+/*eslint-env node*/
 module.exports = (function () {
     var fs = require('fs'),
         Q = require('q'),
         requirejs = require('requirejs'),
         uglifyjs = require('uglify-js'),
-        exec = require('exec-sync');
+        exec = require('child_process').exec;
 
     function uglify(data, cb) {
-       var result = uglifyjs.minify(data, {fromString: true, 'inline-script': true, beautify: false});
+       var result = uglifyjs.minify(data, {
+           fromString: true,
+           output: { inline_script: true, beautify: false }
+       });
        setTimeout(function () { cb(result.code); });
     }
 
@@ -21,8 +23,8 @@ module.exports = (function () {
                 include: ['main'],
                 insertRequire: ['main'],
                 paths: { main: '../' + tmpIn.replace(/\.js$/, '') },
-                //out: tmpOut,
                 wrap: true,
+                //out: file,
                 //onBuildWrite: manageImports,
                 onModuleBundleComplete: function (d) {
                     d = fs.readFileSync(d.path).toString();
@@ -31,15 +33,12 @@ module.exports = (function () {
                 }
             };
 
-        try {
-            options.out = exec('mktemp -t XXXX');
+        exec('mktemp -t XXX', function (e, o) {
+            if (e) { throw e; }
+            options.out = o;
             fs.writeFileSync(tmpIn, data);
             requirejs.optimize(options);
-        } catch (e) {
-            //THINK ABOUT THIS
-            fs.unlinkSync(tmpIn);
-            throw e;
-        }
+        });
     }
 
     function run(file) {
@@ -57,7 +56,7 @@ module.exports = (function () {
                 uglify(file.contents, cb);
             }
         } else {
-            console.warn('WARNING [%s]: Only JS files supported for now. Skipping…'.yellow, file.name);
+            console.warn('WARNING [%s]: Only JS files supported for now. Skipping…', file.name);
         }
 
         return df.promise;

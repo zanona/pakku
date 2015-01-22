@@ -7,25 +7,32 @@ module.exports = (function () {
 
     function cleanCSS(data, cb) {
         new CleanCSS({keepSpecialComments: 0}).minify(data, function (e, output) {
-            cb(output.styles);
+            cb(e, output.styles);
         });
     }
 
     function lessify(data, cb) {
-        less.render(data, function (e, output) { cleanCSS(output.css, cb); });
+        less.render(data, function (e, output) {
+            if (e) { return cb(e); }
+            cleanCSS(output.css, cb);
+        });
     }
 
     function run(file) {
         var df = Q.defer();
 
-        function cb(css) { file.contents = css; df.resolve(file); }
+        function cb(e, css) {
+            if (e) { return df.reject(e); }
+            file.contents = css;
+            df.resolve(file);
+        }
 
         if (file.name.match(/\.less$/)) {
             lessify(file.contents, cb);
         } else if (file.name.match(/\.css$/)) {
             cleanCSS(file.contents, cb);
         } else {
-            console.warn('WARNING [%s]: Only LESS and CSS files supported for now. Skipping…'.yellow, file.name);
+            console.warn('WARNING [%s]: Only LESS and CSS files supported for now. Skipping…', file.name);
         }
 
         return df.promise;
@@ -34,7 +41,7 @@ module.exports = (function () {
     function main(f) {
         var d = Q.defer();
         if (!f.map) { f = [f]; }
-        Q.all(f.map(run)).then(d.resolve);
+        Q.all(f.map(run)).then(d.resolve).catch(d.reject);
         return d.promise;
     }
 

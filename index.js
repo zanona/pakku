@@ -1,29 +1,25 @@
-function main(d, v, flags, index) {
+/*global require, module, console, process*/
+/*eslint no-console:0*/
+function main(d, v, flags, index, buildDir) {
     'use strict';
-    /*global require, module, console, process*/
-    /*eslint no-console:0*/
 
     var path = require('path'),
-        exec = require('exec-sync'),
         colors = v.require('colors'),
         cache = {},
         queue = [],
         min = {
+            html: require('./min/html'),
             css: require('./min/css'),
-            js: require('./min/js')
+            js: require('./min/js'),
+            img: require('./min/img')
         },
+        version = require('./lib/version'),
         replace = require('./lib/replacer')(cache),
-        parser = require('./lib/parser');
+        parser = require('./lib/parser'),
+        build = require('./lib/build')(buildDir);
 
     process.chdir(path.dirname(index));
     index = path.basename(index || 'index.html');
-
-    function versionize(file) {
-        var version = exec('git log -1 --pretty=format:%h -- ' + file.name);
-        if (version) { file.vname = file.name.replace(/(\.\w+$)/, '-' + version + '$1'); }
-        file.vname = file.name;
-    }
-
 
     function onFilesCached() {
         var t = { all: [], docs: [], build: [], html: [], css: [], js: [], img: [] };
@@ -36,18 +32,26 @@ function main(d, v, flags, index) {
             if (!file.inline && !file.skip) { t.build.push(file); }
         });
 
-        //min.js(cache['bootstrap.js']).on('ready', function (js) { console.log(js); });
-        //min.css(cache['main.less']).on('ready', function (css) { console.log(css); });
-
-        replace(t.css)
+        console.log('VERSIONING FILES…'.blue);
+        version(t.all)
+            .tap(function  () { console.log('EXPANDING CSS…'.blue); })
+            .then(function () { return replace(t.css); })
+            .tap(function  () { console.log('MINIFYING CSS…'.blue); })
             .then(min.css)
+            .tap(function  () { console.log('EXPANDING JS…'.blue); })
             .then(function () { return replace(t.js); })
+            .tap(function  () { console.log('MINIFYING JS…'.blue); })
             .then(min.js)
+            .tap(function  () { console.log('EXPANDING HTML…'.blue); })
             .then(function () { return replace(t.html); })
-            .then(function () {
-                console.log(t.build);
-                console.log('PROCESS FINISHED'.rainbow);
-            })
+            .tap(function  () { console.log('MINIFYING HTML…'.blue); })
+            .then(min.html)
+            .tap(function  () { console.log('COMPRESSING IMAGES…'.blue); })
+            .then(function () { return t.img; })
+            .then(min.img)
+            .tap(function  () { console.log('SAVING FILES…'.blue); })
+            .then(function () { return build(t.build); })
+            .then(function () { console.log('PROCESS FINISHED'.rainbow); })
             .catch(d.reject);
     }
 
