@@ -21,6 +21,11 @@ module.exports = function(index, buildDir) {
     process.chdir(path.dirname(index));
     index = path.basename(index || 'index.html');
 
+    function onError(e) {
+        console.log('ERROR'.red.bold, ('[' + e.filename + '] ' + e.message).red);
+        console.log(JSON.stringify(e, null, 2).red);
+    }
+
     function onFilesCached() {
         var t = { all: [], docs: [], build: [], html: [], css: [], js: [], img: [] };
 
@@ -52,7 +57,7 @@ module.exports = function(index, buildDir) {
             .tap(function  () { console.log('SAVING FILES…'.blue); })
             .then(function () { return build(t.build); })
             .then(function () { console.log('PROCESS FINISHED'.rainbow); })
-            .catch(function (e) { throw e; });
+            .catch(onError);
     }
 
     function onResource(file) {

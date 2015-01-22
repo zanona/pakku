@@ -22,7 +22,11 @@ module.exports = (function () {
         var df = Q.defer();
 
         function cb(e, css) {
-            if (e) { return df.reject(e); }
+            if (e) {
+                e.filename = file.name;
+                e.stack = file.contents;
+                return df.reject(e);
+            }
             file.contents = css;
             df.resolve(file);
         }
