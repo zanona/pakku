@@ -9,6 +9,10 @@
   ],
   "author": "Marcus Zanona <zanona@me.com>",
   "homepage": "https://github.com/zanona/volo-pack",
+  "engines": {
+    "node": ">=0.10.0",
+    "npm": ">=2.1.5"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:zanona/volo-pack.git"
