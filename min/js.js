@@ -1,50 +1,54 @@
-/*eslint-env node*/
+/*global module, require, console, setTimeout, process*/
+/*eslint no-console: 0*/
 module.exports = (function () {
     var fs = require('fs'),
         Q = require('q'),
         requirejs = require('requirejs'),
-        uglifyjs = require('uglify-js'),
-        exec = require('child_process').exec;
+        uglifyjs =  require('uglify-js'),
+        almondPath = require.resolve('almond');
 
     function uglify(data, cb) {
-       var result = uglifyjs.minify(data, {
-           fromString: true,
-           output: { inline_script: true, beautify: false }
+       var options = {
+               fromString: true,
+               output: { inline_script: true, beautify: false }
+           },
+           result;
+
+       setTimeout(function () {
+           try {
+               result = uglifyjs.minify(data, options);
+               cb(null, result.code);
+           } catch (e) { cb(e); }
        });
-       setTimeout(function () { cb(result.code); });
     }
 
     function rjs(data, cb) {
-        //THIS HAS TO HAPPEN THROUGH STREAMS INSTEAD FS
-        var tmpIn = parseInt(process.hrtime().join('')).toString(36) + '.js',
+        var almond = fs.readFileSync(almondPath).toString(),
             options = {
-                baseUrl: 'vendor',
+                baseUrl: process.AMD_PATH || './',
                 name: 'almond',
                 include: ['main'],
                 insertRequire: ['main'],
-                paths: { main: '../' + tmpIn.replace(/\.js$/, '') },
+                rawText: {'almond': almond, 'main': data},
                 wrap: true,
-                //out: file,
-                //onBuildWrite: manageImports,
-                onModuleBundleComplete: function (d) {
-                    d = fs.readFileSync(d.path).toString();
-                    fs.unlinkSync(tmpIn);
-                    uglify(d, cb);
-                }
+                optimize: 'none',
+                out: function (text) { uglify(text, cb); }
             };
 
-        exec('mktemp -t XXX', function (e, o) {
-            if (e) { throw e; }
-            options.out = o;
-            fs.writeFileSync(tmpIn, data);
-            requirejs.optimize(options);
+        requirejs.optimize(options, null, function (error) {
+            cb(new Error(error));
         });
     }
 
     function run(file) {
         var df = Q.defer();
 
-        function cb(script) {
+        function cb(e, script) {
+            if (e) {
+                e.filename = file.name;
+                e.stack = file.contents;
+                return df.reject(e);
+            }
             file.contents = script;
             df.resolve(file);
         }
@@ -65,7 +69,7 @@ module.exports = (function () {
     function main(f) {
         var d = Q.defer();
         if (!f.map) { f = [f]; }
-        Q.all(f.map(run)).then(d.resolve);
+        Q.all(f.map(run)).then(d.resolve).catch(d.reject);
         return d.promise;
     }
 
