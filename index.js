@@ -2,6 +2,7 @@
 /*eslint no-console:0*/
 module.exports = function(index, buildDir) {
     'use strict';
+   //process.on('uncaughtException', onError);
 
     var cache = {},
         queue = [],
@@ -22,8 +23,10 @@ module.exports = function(index, buildDir) {
     index = path.basename(index || 'index.html');
 
     function onError(e) {
-        console.log('ERROR'.red.bold, ('[' + e.filename + '] ' + e.message).red);
-        console.log(JSON.stringify(e, null, 2).red);
+        console.log('ERROR'.red.bold, ((e.filename ? '[' + e.filename + '] ' : '') + e.message).red);
+        if (Object.keys(e).length) {
+            console.log(JSON.stringify(e, null, 2).red);
+        }
     }
 
     function onFilesCached() {
