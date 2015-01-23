@@ -11,7 +11,9 @@ module.exports = (function () {
         imagemin.src(file.contents).run(function (e, files) {
             var compression = 100 - Math.ceil((files[0].contents.length * 100) / file.contents.length);
             file.contents = files[0].contents;
-            console.log('COMPRESSED'.green.bold + ' %s in %s%', file.name, compression);
+            if (compression) {
+                console.log('COMPRESSED'.green.bold + ' %s in %s%', file.name, compression);
+            }
             df.resolve(df);
         });
 
