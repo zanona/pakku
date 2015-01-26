@@ -1,14 +1,18 @@
 {
-  "name": "volo-pack",
+  "name": "webpack",
   "version": "0.1.0",
-  "description": "Volo command for building/packing web applications",
+  "description": "Command for packing web applications",
   "keywords": [
-    "volo",
     "web",
+    "bundling",
+    "package",
+    "compression",
+    "html",
+    "performance",
     "automation"
   ],
   "author": "Marcus Zanona <zanona@me.com>",
-  "homepage": "https://github.com/zanona/volo-pack",
+  "homepage": "https://github.com/zanona/webpack",
   "engines": {
     "node": ">=0.10.0",
     "npm": ">=2.1.5"
@@ -18,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:zanona/volo-pack.git"
+    "url": "git@github.com:zanona/webpack.git"
   },
   "dependencies": {
     "almond": "^0.3.0",
@@ -31,20 +35,20 @@
     "uglify-js": "^2.4.16"
   },
   "bugs": {
-    "url": "https://github.com/zanona/volo-pack/issues"
+    "url": "https://github.com/zanona/webpack/issues"
   },
-  "main": "index.js",
+  "main": "index",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "licenses": [
     {
       "type": "BSD",
-      "url": "https://github.com/zanona/volo-pack/blob/master/LICENSE"
+      "url": "https://github.com/zanona/webpack/blob/master/LICENSE"
     },
     {
       "type": "MIT",
-      "url": "https://github.com/zanona/volo-pack/blob/master/LICENSE"
+      "url": "https://github.com/zanona/webpack/blob/master/LICENSE"
     }
   ]
 }
