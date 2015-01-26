@@ -4,8 +4,14 @@ module.exports = (function () {
 
     function run(file) {
         var contents = file.contents;
-        contents = contents
-            .replace(/(\n|\s){2,}/g, '');
+        // FIX compressing lines in
+        // <input name=test
+        //        type=text
+        //        require>
+        // Will compact to <input name=testtype=textrequire>
+        //contents = contents
+        //    .replace(/(\n|\s){2,}/g, '');
+
         file.contents = contents;
         return file;
     }
