@@ -17,12 +17,9 @@
     "node": ">=0.10.0",
     "npm": ">=2.1.5"
   },
+  "main": "index",
   "bin": {
     "pack": "cli.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:zanona/webpack.git"
   },
   "dependencies": {
     "almond": "^0.3.0",
@@ -34,12 +31,15 @@
     "requirejs": "^2.1.15",
     "uglify-js": "^2.4.16"
   },
-  "bugs": {
-    "url": "https://github.com/zanona/webpack/issues"
-  },
-  "main": "index",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zanona/webpack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zanona/webpack/issues"
   },
   "licenses": [
     {
