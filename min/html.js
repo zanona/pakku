@@ -9,8 +9,8 @@ module.exports = (function () {
         //        type=text
         //        require>
         // Will compact to <input name=testtype=textrequire>
-        //contents = contents
-        //    .replace(/(\n|\s){2,}/g, '');
+        contents = contents
+                .replace(/([\s\n])+/g, '$1');
 
         file.contents = contents;
         return file;
