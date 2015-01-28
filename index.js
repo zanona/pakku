@@ -22,6 +22,12 @@ module.exports = function(index, buildDir) {
     process.chdir(path.dirname(index));
     index = path.basename(index || 'index.html');
 
+    function checkQueue(file) {
+        return queue.filter(function (item) {
+            return item.name === file.name;
+        }).length;
+    }
+
     function onError(e) {
         console.log('ERROR'.red.bold, ((e.filename ? '[' + e.filename + '] ' : '') + e.message).red);
         if (Object.keys(e).length) {
@@ -63,12 +69,12 @@ module.exports = function(index, buildDir) {
             .catch(onError);
     }
 
-    function onResource(file) {
+    function onResourceFound(file) {
         if (cache[file.name]) { return; }
         if (file.done) {
             cache[file.name] = file;
             console.log('CACHED'.green.bold + ' ' + file.name);
-        } else if (queue.indexOf(file.name) === -1) {
+        } else if (!checkQueue(file)) {
             queue.push(file);
         }
     }
@@ -88,7 +94,7 @@ module.exports = function(index, buildDir) {
     }
 
     parser
-        .on('resource', onResource)
+        .on('resource', onResourceFound)
         .on('ready', onFileComplete)
         .on('error', onFileError)
         .parse({name: index, type: 'html'});
