@@ -1,4 +1,4 @@
-WebPack
+Pakku
 ===
 
 A module and command-line for packing web applications into a directory.
@@ -7,7 +7,7 @@ A module and command-line for packing web applications into a directory.
 Install this command via npm into the project's local
 `node_modules` directory:
 
-    npm install webpack
+    npm install pakku
 
 ## Usage
 
