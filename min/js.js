@@ -7,6 +7,10 @@ module.exports = (function () {
         uglifyjs =  require('uglify-js'),
         almondPath = require.resolve('almond');
 
+    function jsonify(data, cb) {
+       cb(null, data.replace(/\n+/g, '').replace(/(\s+)/, '$1'));
+    }
+
     function uglify(data, cb) {
        var options = {
                fromString: true,
@@ -59,8 +63,11 @@ module.exports = (function () {
             } else {
                 uglify(file.contents, cb);
             }
+        } else if (file.name.match(/\.json$/)) {
+            jsonify(file.contents, cb);
         } else {
             console.warn('WARNING [%s]: Only JS files supported for now. Skipping…', file.name);
+            cb(null, file.contents);
         }
 
         return df.promise;
