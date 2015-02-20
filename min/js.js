@@ -26,18 +26,22 @@ module.exports = (function () {
        });
     }
 
-    function rjs(data, cb) {
+    function rjs(file, cb) {
         var almond = fs.readFileSync(almondPath).toString(),
             options = {
                 baseUrl: process.AMD_PATH || './',
                 name: 'almond',
                 include: ['main'],
                 insertRequire: ['main'],
-                rawText: {'almond': almond, 'main': data},
+                rawText: {'almond': almond, 'main': file.contents},
                 wrap: true,
                 optimize: 'none',
                 out: function (text) { uglify(text, cb); }
             };
+
+        if (file.contents.match(/require(js)?\.config/)) {
+            options.mainConfigFile = file.name;
+        }
 
         requirejs.optimize(options, null, function (error) {
             cb(new Error(error));
@@ -59,7 +63,7 @@ module.exports = (function () {
 
         if (file.name.match(/\.js$/)) {
             if (file.amd) {
-                rjs(file.contents, cb);
+                rjs(file, cb);
             } else {
                 uglify(file.contents, cb);
             }
