@@ -36,7 +36,7 @@ module.exports = function(index, buildDir) {
     }
 
     function onFilesCached() {
-        var t = { all: [], docs: [], build: [], html: [], css: [], js: [], img: [] };
+        var t = { all: [], docs: [], build: [], html: [], css: [], js: [], img: [], other: [] };
 
         Object.keys(cache).forEach(function (key) {
             var file = cache[key];
