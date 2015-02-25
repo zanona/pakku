@@ -2,7 +2,8 @@
 /*eslint no-console:0*/
 module.exports = (function () {
     var Q = require('q'),
-        Imagemin = require('imagemin');
+        Imagemin = require('imagemin'),
+        log = require('../lib/log');
 
     function run(file) {
         var df = Q.defer(),
@@ -12,7 +13,7 @@ module.exports = (function () {
             var compression = 100 - Math.ceil((files[0].contents.length * 100) / file.contents.length);
             file.contents = files[0].contents;
             if (compression) {
-                console.log('COMPRESSED'.green.bold + ' %s in %s%', file.name, compression);
+                log.info('[%s] compressed in %s%', file.name, compression);
             }
             df.resolve(df);
         });

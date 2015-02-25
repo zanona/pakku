@@ -7,7 +7,7 @@ module.exports = function(index, buildDir) {
     var cache = {},
         queue = [],
         path = require('path'),
-        colors = require('colors'),
+        log  = require('./lib/log'),
         min = {
             html: require('./min/html'),
             css: require('./min/css'),
@@ -29,9 +29,9 @@ module.exports = function(index, buildDir) {
     }
 
     function onError(e) {
-        console.log('ERROR'.red.bold, ((e.filename ? '[' + e.filename + '] ' : '') + e.message).red);
+        log.error('[%s] %s', e.filename, e.message);
         if (Object.keys(e).length) {
-            console.log(JSON.stringify(e, null, 2).red);
+            log.error(e);
         }
     }
 
@@ -46,26 +46,26 @@ module.exports = function(index, buildDir) {
             if (!file.inline && !file.skip) { t.build.push(file); }
         });
 
-        console.log('VERSIONING FILES…'.blue);
+        log.info('VERSIONING FILES…');
         version(t.all)
-            .tap(function  () { console.log('EXPANDING CSS…'.blue); })
+            .tap(function  () { log.info('EXPANDING CSS…'); })
             .then(function () { return replace(t.css); })
-            .tap(function  () { console.log('MINIFYING CSS…'.blue); })
+            .tap(function  () { log.info('MINIFYING CSS…'); })
             .then(min.css)
-            .tap(function  () { console.log('EXPANDING JS…'.blue); })
+            .tap(function  () { log.info('EXPANDING JS…'); })
             .then(function () { return replace(t.js); })
-            .tap(function  () { console.log('MINIFYING JS…'.blue); })
+            .tap(function  () { log.info('MINIFYING JS…'); })
             .then(min.js)
-            .tap(function  () { console.log('EXPANDING HTML…'.blue); })
+            .tap(function  () { log.info('EXPANDING HTML…'); })
             .then(function () { return replace(t.html); })
-            .tap(function  () { console.log('MINIFYING HTML…'.blue); })
+            .tap(function  () { log.info('MINIFYING HTML…'); })
             .then(min.html)
-            .tap(function  () { console.log('COMPRESSING IMAGES…'.blue); })
+            .tap(function  () { log.info('COMPRESSING IMAGES…'); })
             .then(function () { return t.img; })
             .then(min.img)
-            .tap(function  () { console.log('SAVING FILES…'.blue); })
+            .tap(function  () { log.info('SAVING FILES…'); })
             .then(function () { return build(t.build); })
-            .then(function () { console.log('PROCESS FINISHED'.rainbow); })
+            .then(function () { log.success('PROCESS FINISHED'); })
             .catch(onError);
     }
 
@@ -73,7 +73,7 @@ module.exports = function(index, buildDir) {
         if (cache[file.name]) { return; }
         if (file.done) {
             cache[file.name] = file;
-            console.log('CACHED'.green.bold + ' ' + file.name);
+            log.success('CACHED %s', file.name);
         } else if (!checkQueue(file)) {
             queue.push(file);
         }
@@ -89,7 +89,7 @@ module.exports = function(index, buildDir) {
     }
 
     function onFileError(e, file) {
-        console.warn(colors.yellow('WARNING'.bold + ' [' + file.name + '] ' +  e.message + ', skipping…'));
+        log.warn('[%s] %s, skipping…', file.name, e.message);
         onFileComplete();
     }
 
