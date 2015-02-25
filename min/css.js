@@ -31,6 +31,8 @@ module.exports = (function () {
             df.resolve(file);
         }
 
+        if (file.skip) { return file; }
+
         if (file.name.match(/\.less$/)) {
             lessify(file.contents, cb);
         } else if (file.name.match(/\.css$/)) {
