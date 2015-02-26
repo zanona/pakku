@@ -1,47 +1,58 @@
-/*global module, require, console, setTimeout, process*/
-/*eslint no-console: 0*/
-module.exports = (function () {
+module.exports = function (files) {
+    'use strict';
     var fs = require('fs'),
+        vm = require('vm'),
         Q = require('q'),
         requirejs = require('requirejs'),
         uglifyjs =  require('uglify-js'),
-        almondPath = require.resolve('almond');
+        almondPath = require.resolve('almond'),
+        log = require('../utils').log;
 
     function jsonify(data, cb) {
-       cb(null, data.replace(/\n+/g, '').replace(/(\s+)/, '$1'));
+        cb(null, data.replace(/\n+/g, '').replace(/(\s+)/, '$1'));
     }
 
     function uglify(data, cb) {
-       var options = {
-               fromString: true,
-               output: { inline_script: true, beautify: false }
-           },
-           result;
+        var options = {
+                fromString: true,
+                output: { inline_script: true, beautify: false }
+            },
+            result;
 
-       setTimeout(function () {
-           try {
-               result = uglifyjs.minify(data, options);
-               cb(null, result.code);
-           } catch (e) { cb(e); }
-       });
+        setTimeout(function () {
+            try {
+                result = uglifyjs.minify(data, options);
+                cb(null, result.code);
+            } catch (e) {
+                cb(e);
+            }
+        });
+    }
+
+    function findRequireJSConfig(content, cb) {
+        var configSearch = /require(?:js)?\.config(\([\s\S]+?\))/,
+            config = content.match(configSearch);
+
+        if (config && config[1]) {
+            try {
+                return vm.runInNewContext(config[1]);
+            } catch (e) {  cb(e); }
+        }
+        return {};
     }
 
     function rjs(file, cb) {
+        /*jslint stupid:true*/
         var almond = fs.readFileSync(almondPath).toString(),
-            options = {
-                baseUrl: process.AMD_PATH || './',
-                name: 'almond',
-                include: ['main'],
-                insertRequire: ['main'],
-                rawText: {'almond': almond, 'main': file.contents},
-                wrap: true,
-                optimize: 'none',
-                out: function (text) { uglify(text, cb); }
-            };
+            options = findRequireJSConfig(file.contents, cb);
 
-        if (file.contents.match(/require(js)?\.config/)) {
-            options.mainConfigFile = file.name;
-        }
+        options.name = 'almond';
+        options.include = ['main'];
+        options.insertRequire = ['main'];
+        options.rawText = {'almond': almond, 'main': file.contents};
+        options.wrap = true;
+        options.optimize = 'none';
+        options.out = function (text) { uglify(text, cb); };
 
         requirejs.optimize(options, null, function (error) {
             cb(new Error(error));
@@ -70,19 +81,23 @@ module.exports = (function () {
         } else if (file.name.match(/\.json$/)) {
             jsonify(file.contents, cb);
         } else {
-            console.warn('WARNING [%s]: Only JS files supported for now. Skipping…', file.name);
+            log.warn(
+                '[' + file.name + ']',
+                'Only javascript files supported for now.',
+                'Skipping…'
+            );
             cb(null, file.contents);
         }
 
         return df.promise;
     }
 
-    function main(f) {
+    function main() {
         var d = Q.defer();
-        if (!f.map) { f = [f]; }
-        Q.all(f.map(run)).then(d.resolve).catch(d.reject);
+        if (!files.map) { files = [files]; }
+        Q.all(files.map(run)).then(d.resolve, d.reject);
         return d.promise;
     }
 
-    return main;
-}());
+    return main();
+};

@@ -1,5 +1,5 @@
-/*global module, require*/
-module.exports = (function () {
+module.exports = function (files) {
+    'use strict';
     var Q = require('q');
 
     function run(file) {
@@ -16,12 +16,12 @@ module.exports = (function () {
         return file;
     }
 
-    function main(f) {
+    function main() {
         var d = Q.defer();
-        if (!f.map) { f = [f]; }
-        Q.all(f.map(run)).then(d.resolve).catch(d.reject);
+        if (!files.map) { files = [files]; }
+        Q.all(files.map(run)).then(d.resolve, d.reject);
         return d.promise;
     }
 
-    return main;
-}());
+    return main();
+};

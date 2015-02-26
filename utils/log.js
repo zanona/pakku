@@ -29,7 +29,7 @@ module.exports = (function () {
         return str;
     }
 
-    function init(color, args) {
+    function init(type, color, args) {
 
         args = Array.prototype.slice.call(args);
 
@@ -49,17 +49,17 @@ module.exports = (function () {
             return args.splice(1, 1);
         });
 
-        return console.log(
+        return console[type](
             replace(color + '(' + args.join(' ') + ')')
                 .replace(/#@#@/g, ')')
         );
     }
 
     return {
-        info:    function () { init('cyan', arguments);   },
-        warn:    function () { init('yellow', arguments); },
-        error:   function () { init('red', arguments);    },
-        success: function () { init('green', arguments);  }
+        info:    function () { init('info', 'cyan', arguments);   },
+        warn:    function () { init('warn', 'yellow', arguments); },
+        error:   function () { init('error', 'red', arguments);    },
+        success: function () { init('log', 'green', arguments);  }
     };
 
 }());

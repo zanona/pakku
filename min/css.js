@@ -1,12 +1,12 @@
-/*global module, require, console*/
-/*eslint no-console:0*/
-module.exports = (function () {
+module.exports = function (files) {
+    'use strict';
     var Q = require('q'),
         less = require('less'),
         CleanCSS = require('clean-css');
 
     function cleanCSS(data, cb) {
-        new CleanCSS({keepSpecialComments: 0}).minify(data, function (e, output) {
+        var ps = new CleanCSS({ keepSpecialComments: 0 });
+        ps.minify(data, function (e, output) {
             cb(e, output.styles);
         });
     }
@@ -38,18 +38,22 @@ module.exports = (function () {
         } else if (file.name.match(/\.css$/)) {
             cleanCSS(file.contents, cb);
         } else {
-            console.warn('WARNING [%s]: Only LESS and CSS files supported for now. Skipping…', file.name);
+            console.warn(
+                '[' + file.name + ']',
+                'Only LESS and CSS files supported for now.',
+                'Skipping…'
+            );
         }
 
         return df.promise;
     }
 
-    function main(f) {
+    function main() {
         var d = Q.defer();
-        if (!f.map) { f = [f]; }
-        Q.all(f.map(run)).then(d.resolve).catch(d.reject);
+        if (!files.map) { files = [files]; }
+        Q.all(files.map(run)).then(d.resolve, d.reject);
         return d.promise;
     }
 
-    return main;
-}());
+    return main();
+};

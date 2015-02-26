@@ -1,22 +1,16 @@
-/*global require, module, console, process*/
-/*eslint no-console:0*/
-module.exports = function(index, buildDir) {
+module.exports = function (index, buildDir) {
     'use strict';
    //process.on('uncaughtException', onError);
 
     var cache = {},
         queue = [],
         path = require('path'),
-        log  = require('./lib/log'),
-        min = {
-            html: require('./min/html'),
-            css: require('./min/css'),
-            js: require('./min/js'),
-            img: require('./min/img')
-        },
+        Q = require('q'),
+        log = require('./utils').log,
+        min = require('./min'),
         version = require('./lib/version'),
         replace = require('./lib/replacer')(cache),
-        parser = require('./lib/parser'),
+        parser = require('./parser')(),
         build = require('./lib/build')(buildDir);
 
     process.chdir(path.dirname(index));
@@ -36,7 +30,16 @@ module.exports = function(index, buildDir) {
     }
 
     function onFilesCached() {
-        var t = { all: [], docs: [], build: [], html: [], css: [], js: [], img: [], other: [] };
+        var t = {
+            all:   [],
+            docs:  [],
+            build: [],
+            html:  [],
+            css:   [],
+            js:    [],
+            img:   [],
+            other: []
+        };
 
         Object.keys(cache).forEach(function (key) {
             var file = cache[key];
@@ -46,26 +49,26 @@ module.exports = function(index, buildDir) {
             if (!file.inline && !file.skip) { t.build.push(file); }
         });
 
-        log.info('VERSIONING FILES…');
-        version(t.all)
-            .tap(function  () { log.info('EXPANDING CSS…'); })
-            .then(function () { return replace(t.css); })
-            .tap(function  () { log.info('MINIFYING CSS…'); })
-            .then(min.css)
-            .tap(function  () { log.info('EXPANDING JS…'); })
-            .then(function () { return replace(t.js); })
-            .tap(function  () { log.info('MINIFYING JS…'); })
-            .then(min.js)
-            .tap(function  () { log.info('EXPANDING HTML…'); })
-            .then(function () { return replace(t.html); })
-            .tap(function  () { log.info('MINIFYING HTML…'); })
-            .then(min.html)
-            .tap(function  () { log.info('COMPRESSING IMAGES…'); })
-            .then(function () { return t.img; })
-            .then(min.img)
-            .tap(function  () { log.info('SAVING FILES…'); })
-            .then(function () { return build(t.build); })
-            .then(function () { log.success('PROCESS FINISHED'); })
+        Q.resolve()
+            .thenResolve('VERSIONING FILES').tap(log.info)
+            .thenResolve(t.all).then(version)
+
+            .thenResolve('BEAUTIFYING YOUR STYLES…').tap(log.info)
+            .thenResolve(t.css).then(replace).then(min.css)
+
+            .thenResolve('CRANKING YOUR SCRIPTS…').tap(log.info)
+            .thenResolve(t.js).then(replace).then(min.js)
+
+            .thenResolve('BOOKING YOUR PAGES…').tap(log.info)
+            .thenResolve(t.html).then(replace).then(min.html)
+
+            .thenResolve('REVEALING YOUR PICUTRES…').tap(log.info)
+            .thenResolve(t.img).then(min.img)
+
+            .thenResolve('STORING YOUR GOODIES…').tap(log.info)
+            .thenResolve(t.build).then(build)
+
+            .thenResolve('MAGIC FINISHED').tap(log.success)
             .catch(onError);
     }
 
@@ -90,7 +93,10 @@ module.exports = function(index, buildDir) {
 
     function onFileError(e, file) {
         log.warn('[%s] %s, skipping…', file.name, e.message);
-        onFileComplete();
+        //log.error(e.stack);
+        if (checkQueue(file)) {
+            onFileComplete();
+        }
     }
 
     parser
