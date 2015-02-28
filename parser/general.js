@@ -30,8 +30,8 @@ module.exports = function (file, emitter) {
         if (found.external) { return found.href; }
 
         if (file.type === 'html') { found = html.setResource(found, file); }
-        if (file.type === 'css') { found = css.setResource(found); }
-        if (file.type === 'js') { found = js.setResource(found); }
+        if (file.type === 'css') { found = css.setResource(found, file); }
+        if (file.type === 'js') { found = js.setResource(found, file); }
         if (expand) { found.inline = true; }
 
         /* IF FILE EXISTS, TOKENIZE IT
