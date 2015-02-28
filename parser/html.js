@@ -8,7 +8,7 @@ exports.setContent = function (content) {
     /*jslint regexp:true*/
     var i = require('../utils/interpolate'),
         validTags = new RegExp(i(
-            /<(%s)\b([^>]*)>(?:([^<]+)?<\/\1>)?/,
+            /<(%s)\b([^>]*)>(?:([\s\S]*?)<\/\1>)?/,
             'script|link|style'
         ), 'gi');
 
