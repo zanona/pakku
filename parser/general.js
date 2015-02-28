@@ -48,7 +48,7 @@ module.exports = function (file, emitter) {
                 found.query
             );
         } catch (e) {
-            emitter.emit('error', e, found);
+            emitter.emit('error', e, file);
             return found.href;
         }
     }
