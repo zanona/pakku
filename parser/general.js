@@ -10,7 +10,7 @@ module.exports = function (file, emitter) {
         i     = utils.interpolate,
         resolvePath = utils.resolve,
         whitelist = new RegExp(i(
-            /(@)?([\w\-\/\:\.]+)\.(%s)\b(?=[^=(])/,
+            /(@)?([\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
             'jpg|png|gif|svg|less|css|js|json|html|xml'
         ), 'ig');
 
