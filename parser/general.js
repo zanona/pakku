@@ -26,8 +26,11 @@ module.exports = function (file, emitter) {
             found;
 
         found = resolvePath(href, parent);
-
         if (found.external) { return found.href; }
+
+        //LIMIT RESOLVED PATH TO CWD
+        //../file.png should redirect to file.png
+        found.name = found.name.replace(/^(\.\.\/)+/, '');
 
         if (file.type === 'html') { found = html.setResource(found, file); }
         if (file.type === 'css') { found = css.setResource(found, file); }
