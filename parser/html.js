@@ -96,13 +96,16 @@ exports.setContent = function (content) {
     return content;
 };
 
-exports.setResource = function (file) {
+exports.setResource = function (file, parent) {
     'use strict';
     file = JSON.parse(JSON.stringify(file));
     file.name = file.name.replace(/^__amd_/, function () {
         file.amd = true;
         return '';
     });
-    if (tmpFiles[file.name]) { file.contents = tmpFiles[file.name]; }
+    if (tmpFiles[file.href]) {
+        file.name = parent.name.replace(/\./g, '-') + '-' + file.href;
+        file.contents = tmpFiles[file.href];
+    }
     return file;
 };
