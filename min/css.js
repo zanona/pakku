@@ -1,13 +1,26 @@
+/*jslint node:true*/
 module.exports = function (files) {
     'use strict';
     var Q = require('q'),
         less = require('less'),
+        autoprefixer = require('autoprefixer-core'),
         CleanCSS = require('clean-css');
+
+    function autoprefix(data, cb) {
+        try {
+            var css = autoprefixer({ browsers: ['last 2 version'] })
+                .process(data).css;
+            cb(null, css);
+        } catch (e) {
+            return cb(e);
+        }
+    }
 
     function cleanCSS(data, cb) {
         var ps = new CleanCSS({ keepSpecialComments: 0 });
         ps.minify(data, function (e, output) {
-            cb(e, output.styles);
+            if (e) { return cb(e); }
+            autoprefix(output.styles, cb);
         });
     }
 
