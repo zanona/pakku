@@ -8,7 +8,7 @@ module.exports = function (files) {
 
     function autoprefix(data, cb) {
         try {
-            var css = autoprefixer({ browsers: ['last 2 version'] })
+            var css = autoprefixer({ browsers: ['last 2 version', 'IE 9'] })
                 .process(data).css;
             cb(null, css);
         } catch (e) {
