@@ -1,3 +1,4 @@
+/*jslint node:true*/
 exports.setContent = function (content) {
     'use strict';
     /*jslint regexp:true*/
@@ -31,10 +32,12 @@ exports.setResource = function (file) {
         file.href = file.href.replace(/^__base_/, '');
         file = resolve(file.href, './');
     }
-    // Skip all resources, except images.
+    // Skip all css import resources.
     // CSS files are supposed to be merged into the main file
     // hence, skipping and inlining
-    if (file.type !== 'img') { file.skip = true; }
-    if (file.type === 'css') { file.inline = true; }
+    if (file.type === 'css') {
+        file.skip = true;
+        file.inline = true;
+    }
     return file;
 };

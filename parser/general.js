@@ -1,3 +1,4 @@
+/*jslint node:true*/
 module.exports = function (file, emitter) {
     'use strict';
 
@@ -11,7 +12,7 @@ module.exports = function (file, emitter) {
         resolvePath = utils.resolve,
         whitelist = new RegExp(i(
             /(@)?([\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
-            'jpg|png|gif|svg|less|css|js|json|html|xml'
+            'jpg|png|gif|svg|less|css|js|json|html|xml|eot|ttf|woff|pdf'
         ), 'ig');
 
     if (file.type === 'html') {
