@@ -24,6 +24,7 @@
   "dependencies": {
     "almond": "^0.3.1",
     "autoprefixer-core": "^5.1.9",
+    "browserify": "^11.0.1",
     "clean-css": "^3.3.5",
     "imagemin": "^3.2.0",
     "less": "^2.2.0",

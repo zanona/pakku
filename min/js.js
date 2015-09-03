@@ -1,8 +1,10 @@
+/*jslint node:true*/
 module.exports = function (files) {
     'use strict';
     var fs = require('fs'),
         vm = require('vm'),
         Q = require('q'),
+        browserify = require('browserify'),
         requirejs = require('requirejs'),
         uglifyjs =  require('uglify-js'),
         almondPath = require.resolve('almond'),
@@ -59,6 +61,13 @@ module.exports = function (files) {
         });
     }
 
+    function brwsrfy(file, cb) {
+        browserify(file.name).bundle(function (error, buffer) {
+            if (error) { return cb(new Error(error)); }
+            uglify(buffer.toString(), cb);
+        });
+    }
+
     function run(file) {
         var df = Q.defer();
 
@@ -75,6 +84,8 @@ module.exports = function (files) {
         if (file.name.match(/\.js$/)) {
             if (file.amd) {
                 rjs(file, cb);
+            } else if (file.contents.match(/\brequire\(/)) {
+                brwsrfy(file, cb);
             } else {
                 uglify(file.contents, cb);
             }
