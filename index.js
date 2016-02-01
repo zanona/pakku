@@ -1,8 +1,10 @@
+/*jslint node:true*/
 module.exports = function (index, buildDir) {
     'use strict';
    //process.on('uncaughtException', onError);
 
-    var cache = {},
+    var options = Array.prototype.slice.call(arguments).slice(2).join(' '),
+        cache = {},
         queue = [],
         path = require('path'),
         Q = require('q'),
@@ -62,8 +64,16 @@ module.exports = function (index, buildDir) {
             .thenResolve('BOOKING YOUR PAGES…').tap(log.info)
             .thenResolve(t.html).then(replace).then(min.html)
 
-            .thenResolve('REVEALING YOUR PICUTRES…').tap(log.info)
-            .thenResolve(t.img).then(min.img)
+            .then(function (a) {
+                if (!options.match('--no-compress-images')) {
+                    return Q.resolve(a)
+                        .thenResolve('REVEALING YOUR PICTURES…').tap(log.info)
+                        .thenResolve(t.img).then(min.img);
+                }
+
+                return Q.resolve(a)
+                    .thenResolve('SKIPPING IMAGE COMPRESSION').tap(log.info);
+            })
 
             .thenResolve('STORING YOUR GOODIES…').tap(log.info)
             .thenResolve(t.build).then(build)
