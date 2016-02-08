@@ -52,8 +52,16 @@ module.exports = function (index, buildDir) {
         });
 
         Q.resolve()
-            .thenResolve('VERSIONING FILES').tap(log.info)
-            .thenResolve(t.all).then(version)
+            .then(function (a) {
+                if (!options.match('--no-versioning')) {
+                    return Q.resolve(a)
+                        .thenResolve('VERSIONING FILES').tap(log.info)
+                        .thenResolve(t.all).then(version);
+                }
+
+                return Q.resolve(a)
+                    .thenResolve('SKIPPING FILE VERSIONING').tap(log.info);
+            })
 
             .thenResolve('BEAUTIFYING YOUR STYLES…').tap(log.info)
             .thenResolve(t.css).then(replace).then(min.css)
