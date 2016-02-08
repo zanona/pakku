@@ -9,6 +9,7 @@ module.exports = function (index, buildDir) {
         path = require('path'),
         Q = require('q'),
         log = require('./utils').log,
+        resolve = require('./utils').resolve,
         min = require('./min'),
         version = require('./lib/version'),
         replace = require('./lib/replacer')(cache),
@@ -121,5 +122,5 @@ module.exports = function (index, buildDir) {
         .on('resource', onResourceFound)
         .on('ready', onFileComplete)
         .on('error', onFileError)
-        .parse({name: index, type: 'html'});
+        .parse(resolve(index));
 };
