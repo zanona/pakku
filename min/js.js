@@ -62,7 +62,12 @@ module.exports = function (files) {
     }
 
     function brwsrfy(file, cb) {
-        browserify(file.name).bundle(function (error, buffer) {
+        var s = new require('stream').Readable(),
+            path = require('path').parse(process.cwd() + '/' + file.href);
+        s.push(file.contents);
+        s.push(null);
+        //send alterred file stream to browserify
+        browserify(s, { basedir: path.dir }).bundle(function (error, buffer) {
             if (error) { return cb(new Error(error)); }
             uglify(buffer.toString(), cb);
         });
