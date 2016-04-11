@@ -41,6 +41,7 @@ module.exports = function (index, buildDir) {
             css:   [],
             js:    [],
             img:   [],
+            txt:   [],
             other: []
         };
 
