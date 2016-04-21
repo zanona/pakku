@@ -12,7 +12,7 @@ module.exports = function (file, emitter) {
         resolvePath = utils.resolve,
         whitelist = new RegExp(i(
             /(@)?([\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
-            'jpg|png|gif|svg|less|css|js|json|html|xml|eot|ttf|woff|pdf'
+            'jpg|png|gif|svg|less|css|js|json|html|xml|eot|ttf|woff|otf|pdf'
         ), 'ig');
 
     if (file.type === 'html') {
