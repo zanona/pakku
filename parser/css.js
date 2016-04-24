@@ -1,4 +1,5 @@
 /*jslint node:true*/
+var path = require('path');
 exports.setContent = function (content) {
     'use strict';
     /*jslint regexp:true*/
@@ -7,6 +8,7 @@ exports.setContent = function (content) {
         attrSelectors = /\[(?:src|href)[*|\^?]?=(['"])?(.+?)\1?\]/g;
 
     content = content.replace(imports, function (m, href) {
+        if (!path.extname(href)) { href = href + '.less'; }
         if (resolve(href).external) { return m; }
         return href;
     });
