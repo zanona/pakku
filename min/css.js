@@ -4,16 +4,15 @@ module.exports = function (files) {
     var Q = require('q'),
         less = require('less'),
         autoprefixer = require('autoprefixer-core'),
+        postcss = require('postcss'),
         CleanCSS = require('clean-css');
 
     function autoprefix(data, cb) {
-        try {
-            var css = autoprefixer({ browsers: ['last 2 version', 'IE 9'] })
-                .process(data).css;
-            cb(null, css);
-        } catch (e) {
-            return cb(e);
-        }
+        postcss([autoprefixer]).process(data, {
+            browsers: ['last 2 version']
+        }).then(function (cleaned) {
+            cb(null, cleaned.css);
+        }).catch(cb);
     }
 
     function cleanCSS(data, cb) {
