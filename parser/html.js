@@ -10,7 +10,8 @@ exports.setContent = function (content) {
         validTags = new RegExp(i(
             /<(%s)\b([^>]*)>(?:([\s\S]*?)<\/\1>)?/,
             'script|link|style'
-        ), 'gi');
+        ), 'gi'),
+        SSIPattern = /<!--#include file=[\"\']?(.+?)[\"\']? -->/g;
 
     function flattenAttrs(attrs) {
         var r = Object.keys(attrs).map(function (key) {
@@ -92,7 +93,10 @@ exports.setContent = function (content) {
         return match;
     }
 
-    content = content.replace(validTags, parse);
+    function parseSSI(m, filePath) { return '@' + filePath; }
+    content = content
+        .replace(validTags, parse)
+        .replace(SSIPattern, parseSSI);
     return content;
 };
 
