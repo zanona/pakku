@@ -27,7 +27,7 @@
     "browserify": "^11.2.0",
     "clean-css": "^3.4.12",
     "imagemin": "^3.2.2",
-    "less": "^2.5.3",
+    "less": "^2.6.1",
     "postcss": "^5.0.19",
     "q": "^1.4.1",
     "requirejs": "^2.1.20",
