@@ -1,20 +1,17 @@
-/*jslint node:true*/
 module.exports = function (index, buildDir) {
-    'use strict';
-   //process.on('uncaughtException', onError);
 
     var options = Array.prototype.slice.call(arguments).slice(2).join(' '),
-        cache = {},
-        queue = [],
-        path = require('path'),
-        Q = require('q'),
-        log = require('./utils').log,
+        cache   = {},
+        queue   = [],
+        path    = require('path'),
+        Q       = require('q'),
+        log     = require('./utils').log,
         resolve = require('./utils').resolve,
-        min = require('./min'),
+        min     = require('./min'),
         version = require('./lib/version'),
         replace = require('./lib/replacer')(cache),
-        parser = require('./parser')(),
-        build = require('./lib/build')(buildDir);
+        parser  = require('./parser')(),
+        build   = require('./lib/build')(buildDir);
 
     process.chdir(path.dirname(index));
     index = path.basename(index || 'index.html');
@@ -27,9 +24,7 @@ module.exports = function (index, buildDir) {
 
     function onError(e) {
         log.error('[%s] %s', e.filename, e.message);
-        if (Object.keys(e).length) {
-            log.error(e);
-        }
+        if (Object.keys(e).length) { log.error(e); }
     }
 
     function onFilesCached() {
@@ -60,7 +55,6 @@ module.exports = function (index, buildDir) {
                         .thenResolve('VERSIONING FILES').tap(log.info)
                         .thenResolve(t.all).then(version);
                 }
-
                 return Q.resolve(a)
                     .thenResolve('SKIPPING FILE VERSIONING').tap(log.info);
             })
@@ -113,10 +107,7 @@ module.exports = function (index, buildDir) {
 
     function onFileError(e, file) {
         log.warn('[%s] %s, skipping…', file.name, e.message);
-        //log.error(e.stack);
-        if (checkQueue(file)) {
-            onFileComplete();
-        }
+        if (checkQueue(file)) { onFileComplete(); }
     }
 
     parser

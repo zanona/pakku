@@ -1,19 +1,16 @@
-/*jslint node:true*/
-module.exports = function (file, emitter) {
-    'use strict';
+var fs    = require('fs'),
+    utils = require('../utils'),
+    html  = require('./html'),
+    css   = require('./css'),
+    js    = require('./js'),
+    i     = utils.interpolate,
+    resolvePath = utils.resolve,
+    whitelist   = new RegExp(i(
+        /(@)?([\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
+        'jpg|png|gif|svg|less|css|js|json|html|xml|eot|ttf|woff|otf|pdf'
+    ), 'ig');
 
-    /*jslint regexp:true*/
-    var fs    = require('fs'),
-        utils = require('../utils'),
-        html  = require('./html'),
-        css   = require('./css'),
-        js    = require('./js'),
-        i     = utils.interpolate,
-        resolvePath = utils.resolve,
-        whitelist = new RegExp(i(
-            /(@)?([\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
-            'jpg|png|gif|svg|less|css|js|json|html|xml|eot|ttf|woff|otf|pdf'
-        ), 'ig');
+module.exports = function (file, emitter) {
 
     if (file.type === 'html') {
         file.contents = html.setContent(file.contents);
@@ -34,15 +31,13 @@ module.exports = function (file, emitter) {
         found.name = found.name.replace(/^(\.\.\/)+/, '');
 
         if (file.type === 'html') { found = html.setResource(found, file); }
-        if (file.type === 'css') { found = css.setResource(found, file); }
-        if (file.type === 'js') { found = js.setResource(found, file); }
+        if (file.type === 'css')  { found = css.setResource(found, file); }
+        if (file.type === 'js')   { found = js.setResource(found, file); }
         if (expand) { found.inline = true; }
 
         /* IF FILE EXISTS, TOKENIZE IT
          * OTHERWISE RE-APPLY ORIGINAL NAME */
-
         try {
-            /*jslint stupid: true*/
             if (!found.contents) { fs.openSync(found.name, 'r'); }
             emitter.emit('resource', found);
             return i(

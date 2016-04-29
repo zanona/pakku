@@ -1,14 +1,11 @@
 module.exports = function () {
-    'use strict';
-
     var EventEmitter = require('events').EventEmitter,
-        self = new EventEmitter(),
-        fs = require('fs');
+        self         = new EventEmitter(),
+        fs           = require('fs');
 
     self.parse = function (file) {
         try {
             if (!file.contents) {
-                /*jslint stupid:true*/
                 file.contents = fs.readFileSync(file.name);
             }
             if (!file.type.match(/img|other/)) {
@@ -26,6 +23,5 @@ module.exports = function () {
         }
         return self;
     };
-
     return self;
 };

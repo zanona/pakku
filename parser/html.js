@@ -1,17 +1,14 @@
-var tmpFiles;
+var i = require('../utils/interpolate'),
+    validTags = new RegExp(i(
+        /<(%s)\b([^>]*)>(?:([\s\S]*?)<\/\1>)?/,
+        'script|link|style'
+    ), 'gi'),
+    SSIPattern = /<!--#include file=[\"\']?(.+?)[\"\']? -->/g,
+    tmpFiles;
 
 exports.setContent = function (content) {
-    'use strict';
     //NEED TO CLEAN CACHE ONCE IT PERSISTS ACCROSS INSTANCES
     tmpFiles = {};
-
-    /*jslint regexp:true*/
-    var i = require('../utils/interpolate'),
-        validTags = new RegExp(i(
-            /<(%s)\b([^>]*)>(?:([\s\S]*?)<\/\1>)?/,
-            'script|link|style'
-        ), 'gi'),
-        SSIPattern = /<!--#include file=[\"\']?(.+?)[\"\']? -->/g;
 
     function flattenAttrs(attrs) {
         var r = Object.keys(attrs).map(function (key) {
@@ -25,20 +22,17 @@ exports.setContent = function (content) {
     function getAttrs(str) {
         var r = {},
             search = /\b([\w\-]+)\b=?(?:(["'])([\s\S]+?)\2|([^ ]+)|)/g;
-
         str.replace(search, function (m, key, sep, value, altValue) {
-            /*jslint unparam:true*/
             if (!value && !altValue) {
                 r[key] = true;
             } else {
                 r[key] = value || altValue;
             }
         });
-
         return r;
     }
 
-    function parse(match, tag, attrs, content, index) {
+    function parse(match, tag, attrs, textContent, index) {
 
         attrs = getAttrs(attrs);
 
@@ -61,14 +55,14 @@ exports.setContent = function (content) {
 
         attrs = flattenAttrs(attrs);
 
-        if (tag.match(/style|script/) && content) {
+        if (tag.match(/style|script/) && textContent) {
             tmpFilename = i(
                 '%s-%s.%s',
                 tag,
                 index,
                 tag === 'style' ? 'css' : 'js'
             );
-            tmpFiles[tmpFilename] = content;
+            tmpFiles[tmpFilename] = textContent;
             return i(
                 '<%s %s>@%s</%s>',
                 tag,
@@ -94,6 +88,7 @@ exports.setContent = function (content) {
     }
 
     function parseSSI(m, filePath) { return '@' + filePath; }
+
     content = content
         .replace(validTags, parse)
         .replace(SSIPattern, parseSSI);
@@ -101,7 +96,6 @@ exports.setContent = function (content) {
 };
 
 exports.setResource = function (file, parent) {
-    'use strict';
     file = JSON.parse(JSON.stringify(file));
     file.name = file.name.replace(/^__amd_/, function () {
         file.amd = true;
