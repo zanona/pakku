@@ -63,7 +63,7 @@ module.exports = function (files) {
 
     function brwsrfy(file, cb) {
         var s = new require('stream').Readable(),
-            path = require('path').parse(process.cwd() + '/' + file.href);
+            path = require('path').parse(process.cwd() + '/' + file.name);
         s.push(file.contents);
         s.push(null);
         //send alterred file stream to browserify
