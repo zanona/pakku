@@ -13,8 +13,7 @@ var fs    = require('fs'),
 module.exports = function (file, emitter) {
 
     if (file.type === 'html') {
-        file.contents = html.setContent(file.contents);
-    }
+        file.contents = html.setContent(file.contents); }
     if (file.type === 'css') { file.contents = css.setContent(file.contents); }
 
     function onURL(href, expand) {
