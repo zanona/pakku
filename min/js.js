@@ -7,6 +7,8 @@ module.exports = function (files) {
         browserify = require('browserify'),
         requirejs = require('requirejs'),
         uglifyjs =  require('uglify-js'),
+        regenerator = require('regenerator'),
+        through = require('through'),
         almondPath = require.resolve('almond'),
         log = require('../utils').log;
 
@@ -61,16 +63,31 @@ module.exports = function (files) {
         });
     }
 
+    function regeneratorTransform () {
+        var data = '';
+        function write(buf) { data += buf; }
+        function end() {
+            try {
+                var code = regenerator.compile(data).code;
+                this.queue(code);
+                this.queue(null);
+            } catch (e) { this.emit('error', e); }
+        }
+        return through(write, end);
+    }
+
     function brwsrfy(file, cb) {
         var s = new require('stream').Readable(),
             path = require('path').parse(process.cwd() + '/' + file.name);
         s.push(file.contents);
         s.push(null);
         //send alterred file stream to browserify
-        browserify(s, { basedir: path.dir }).bundle(function (error, buffer) {
-            if (error) { return cb(new Error(error)); }
-            uglify(buffer.toString(), cb);
-        });
+        browserify(s, { basedir: path.dir })
+            .transform(regeneratorTransform)
+            .bundle(function (error, buffer) {
+                if (error) { return cb(new Error(error)); }
+                uglify(buffer.toString(), cb);
+            });
     }
 
     function run(file) {
