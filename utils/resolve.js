@@ -14,7 +14,7 @@ module.exports = function (href, parentSrc) {
     /* IF PATH IS / ASSUME HTML AND FALLBACK TO INDEX FILE */
     if (href === '/') { href = '/index.html'; }
     /* IF PATH STARTS WITH / PREPEND PROCESS.CWD */
-    if (href.match(/^\//)) {
+    if (href.match(/^\/\w/)) {
         href = dir + href;
         href = path.relative(parentDir, href);
     }
