@@ -1,18 +1,13 @@
 module.exports = function (files) {
     'use strict';
-    var Q = require('q');
+    var Q = require('q'),
+        minify = require('html-minifier').minify;
 
     function run(file) {
-        var contents = file.contents;
-        // FIX compressing lines in
-        // <input name=test
-        //        type=text
-        //        require>
-        // Will compact to <input name=testtype=textrequire>
-        contents = contents
-                .replace(/([\s\n])+/g, '$1');
-
-        file.contents = contents;
+        file.contents = minify(file.contents, {
+            removeComments: true,
+            removeAttributeQuotes: true
+        });
         return file;
     }
 
