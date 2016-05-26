@@ -22,8 +22,9 @@
     "pakku": "cli.js"
   },
   "dependencies": {
-    "almond": "^0.3.1",
     "autoprefixer-core": "^5.2.1",
+    "babel-core": "^6.9.0",
+    "babel-preset-es2015": "^6.9.0",
     "browserify": "^11.2.0",
     "clean-css": "^3.4.12",
     "html-minifier": "^2.1.3",
@@ -32,7 +33,6 @@
     "postcss": "^5.0.19",
     "q": "^1.4.1",
     "regenerator": "^0.8.46",
-    "requirejs": "^2.1.20",
     "uglify-js": "^2.6.0"
   },
   "scripts": {

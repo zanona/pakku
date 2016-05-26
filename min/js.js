@@ -1,128 +1,104 @@
-/*jslint node:true*/
+/*eslint indent:4*/
 module.exports = function (files) {
     'use strict';
     var fs = require('fs'),
         vm = require('vm'),
         Q = require('q'),
         browserify = require('browserify'),
-        requirejs = require('requirejs'),
+        babel      = require('babel-core'),
+        es2015     = require('babel-preset-es2015'),
         uglifyjs =  require('uglify-js'),
         regenerator = require('regenerator'),
-        through = require('through'),
-        almondPath = require.resolve('almond'),
         log = require('../utils').log;
 
-    function jsonify(data, cb) {
-        cb(null, data.replace(/\n+/g, '').replace(/(\s+)/, '$1'));
-    }
-
-    function uglify(data, cb) {
-        var options = {
-                fromString: true,
-                output: { inline_script: true, beautify: false }
-            },
-            result;
-
-        setTimeout(function () {
+    function minifyJSON(file) {
+        return new Promise((resolve, reject) => {
             try {
-                result = uglifyjs.minify(data, options);
-                cb(null, result.code);
+                file.contents = file.contents
+                    .replace(/\n+/g, '')
+                    .replace(/(\s+)/, '$1');
+                resolve(file);
             } catch (e) {
-                cb(e);
+                reject(e);
             }
         });
     }
+    function uglify(file) {
+        var options = {
+            fromString: true,
+            output: { inline_script: true, beautify: false }
+        };
 
-    function findRequireJSConfig(content, cb) {
-        var configSearch = /require(?:js)?\.config(\([\s\S]+?\))/,
-            config = content.match(configSearch);
-
-        if (config && config[1]) {
+        return new Promise((resolve, reject) => {
             try {
-                return vm.runInNewContext(config[1]);
-            } catch (e) {  cb(e); }
-        }
-        return {};
-    }
-
-    function rjs(file, cb) {
-        /*jslint stupid:true*/
-        var almond = fs.readFileSync(almondPath).toString(),
-            options = findRequireJSConfig(file.contents, cb);
-
-        options.name = 'almond';
-        options.include = ['main'];
-        options.insertRequire = ['main'];
-        options.rawText = {'almond': almond, 'main': file.contents};
-        options.wrap = true;
-        options.optimize = 'none';
-        options.out = function (text) { uglify(text, cb); };
-
-        requirejs.optimize(options, null, function (error) {
-            cb(new Error(error));
+                file.contents = uglifyjs.minify(file.contents, options).code;
+                resolve(file);
+            } catch (e) {
+                reject(e);
+            }
         });
     }
-
-    function regeneratorTransform () {
-        var data = '';
-        function write(buf) { data += buf; }
-        function end() {
-            try {
-                var code = regenerator.compile(data).code;
-                this.queue(code);
-                this.queue(null);
-            } catch (e) { this.emit('error', e); }
-        }
-        return through(write, end);
+    function brwsrfy(file) {
+        return new Promise((resolve, reject) => {
+            if (!file.contents.match(/\brequire\(/)) { return resolve(file); }
+            var s = new require('stream').Readable(),
+                path = require('path').parse(process.cwd() + '/' + file.name);
+            s.push(file.contents);
+            s.push(null);
+            //send alterred file stream to browserify
+            browserify(s, { basedir: path.dir })
+                .bundle(function (error, buffer) {
+                    if (error) { return reject(error); }
+                    file.contents = buffer.toString();
+                    resolve(file);
+                });
+        });
     }
-
-    function brwsrfy(file, cb) {
-        var s = new require('stream').Readable(),
-            path = require('path').parse(process.cwd() + '/' + file.name);
-        s.push(file.contents);
-        s.push(null);
-        //send alterred file stream to browserify
-        browserify(s, { basedir: path.dir })
-            .transform(regeneratorTransform)
-            .bundle(function (error, buffer) {
-                if (error) { return cb(new Error(error)); }
-                uglify(buffer.toString(), cb);
-            });
+    function babelify(file) {
+        return new Promise((resolve, reject) => {
+            try {
+                file.contents = babel.transform(file.contents, es2015).code;
+                resolve(file);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+    function regenerate(file) {
+        return new Promise((resolve, reject) => {
+            try {
+                file.contents = regenerator.compile(file.contents).code;
+                resolve(file);
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
     function run(file) {
-        var df = Q.defer();
 
-        function cb(e, script) {
-            if (e) {
-                e.filename = file.name;
-                e.stack = file.contents;
-                return df.reject(e);
-            }
-            file.contents = script;
-            df.resolve(file);
+        function formatError(e) {
+            e.filename = file.name;
+            e.stack = file.contents;
+            throw e;
         }
 
         if (file.name.match(/\.js$/)) {
-            if (file.amd) {
-                rjs(file, cb);
-            } else if (file.contents.match(/\brequire\(/)) {
-                brwsrfy(file, cb);
-            } else {
-                uglify(file.contents, cb);
-            }
+            return regenerate(file)
+                .then(babelify)
+                .then(brwsrfy)
+                .then(uglify)
+                .catch(formatError);
         } else if (file.name.match(/\.json$/)) {
-            jsonify(file.contents, cb);
+            return jsonify(file, formatError);
         } else {
             log.warn(
                 '[' + file.name + ']',
                 'Only javascript files supported for now.',
                 'Skipping…'
             );
-            cb(null, file.contents);
+            return file;
         }
-
-        return df.promise;
     }
 
     function main() {
