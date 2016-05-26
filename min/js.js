@@ -57,7 +57,11 @@ module.exports = function (files) {
     function babelify(file) {
         return new Promise((resolve, reject) => {
             try {
-                file.contents = babel.transform(file.contents, es2015).code;
+                file.contents = babel
+                    .transform(file.contents, {
+                        filename: file.name,
+                        presets: [es2015]
+                    }).code;
                 resolve(file);
             } catch (e) {
                 reject(e);
@@ -81,6 +85,10 @@ module.exports = function (files) {
             e.filename = file.name;
             e.stack = file.contents;
             throw e;
+        }
+        //skip dependency files
+        if (file.name.match(/bower_components|node_modules/)) {
+            return file;
         }
 
         if (file.name.match(/\.js$/)) {
