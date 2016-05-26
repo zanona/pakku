@@ -1,3 +1,4 @@
+/*eslint indent:4*/
 var i = require('../utils/interpolate'),
     validTags = new RegExp(i(
         /<(%s)\b([^>]*)>(?:([\s\S]*?)<\/\1>)?/,
@@ -89,7 +90,11 @@ exports.setContent = function (content) {
 
     function parseSSI(m, filePath) { return '@' + filePath; }
 
-    content = content
+    function stripCommentsExceptSSI(str) {
+        return str.replace(/<!--(?!#include)[\s\S]*?-->/gmi, '');
+    }
+
+    content = stripCommentsExceptSSI(content)
         .replace(validTags, parse)
         .replace(SSIPattern, parseSSI);
     return content;
