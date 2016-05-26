@@ -1,13 +1,19 @@
+/*eslint indent:4*/
 module.exports = function (files) {
     'use strict';
     var Q = require('q'),
+        log = require('../utils').log,
         minify = require('html-minifier').minify;
 
     function run(file) {
-        file.contents = minify(file.contents, {
-            removeComments: true,
-            removeAttributeQuotes: true
-        });
+        try {
+            file.contents = minify(file.contents, {
+                removeComments: true,
+                removeAttributeQuotes: true
+            });
+        } catch (e) {
+            log.error('ERROR: Minifying HTML on', file.name);
+        }
         return file;
     }
 
