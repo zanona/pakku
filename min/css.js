@@ -1,63 +1,72 @@
-/*jslint node:true*/
+/*eslint indent:4*/
 module.exports = function (files) {
     'use strict';
     var Q = require('q'),
         less = require('less'),
         autoprefixer = require('autoprefixer-core'),
         postcss = require('postcss'),
-        CleanCSS = require('clean-css');
+        CleanCSS = require('clean-css'),
+        log = require('../utils/log');
 
-    function autoprefix(data, cb) {
-        postcss([autoprefixer]).process(data, {
-            browsers: ['last 2 version']
-        }).then(function (cleaned) {
-            cb(null, cleaned.css);
-        }).catch(cb);
-    }
-
-    function cleanCSS(data, cb) {
-        var ps = new CleanCSS({ keepSpecialComments: 0 });
-        ps.minify(data, function (e, output) {
-            if (e) { return cb(e); }
-            autoprefix(output.styles, cb);
+    function autoprefix(file) {
+        return new Promise((resolve, reject) => {
+            postcss([autoprefixer]).process(file.contents, {
+                browsers: ['last 2 version']
+            }).then(function (output) {
+                file.contents = output.css;
+                resolve(file);
+            }).catch(reject);
         });
     }
-
-    function lessify(data, cb) {
-        less.render(data, function (e, output) {
-            if (e) { return cb(e); }
-            cleanCSS(output.css, cb);
+    function cleanCSS(file) {
+        return new Promise((resolve, reject) => {
+            var ps = new CleanCSS({ keepSpecialComments: 0 });
+            try {
+                file.contents = ps.minify(file.contents).styles;
+                resolve(file);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+    function lessify(file) {
+        return new Promise((resolve, reject) => {
+            less.render(file.contents, function (e, output) {
+                if (e) { return reject(e); }
+                file.contents = output.css;
+                resolve(file);
+            });
         });
     }
 
     function run(file) {
-        var df = Q.defer();
-
-        function cb(e, css) {
+        function parseError(e) {
             if (e) {
                 e.filename = file.name;
                 e.stack = file.contents;
-                return df.reject(e);
+                throw e;
             }
-            file.contents = css;
-            df.resolve(file);
         }
 
         if (file.skip) { return file; }
 
         if (file.name.match(/\.less$/)) {
-            lessify(file.contents, cb);
+            return lessify(file)
+                .then(autoprefix)
+                .then(cleanCSS)
+                .catch(parseError);
         } else if (file.name.match(/\.css$/)) {
-            cleanCSS(file.contents, cb);
+            return autoprefix(file)
+                .then(cleanCSS)
+                .catch(parseError);
         } else {
             console.warn(
                 '[' + file.name + ']',
                 'Only LESS and CSS files supported for now.',
                 'Skipping…'
             );
+            return file;
         }
-
-        return df.promise;
     }
 
     function main() {
