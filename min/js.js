@@ -41,7 +41,8 @@ module.exports = function (files) {
     }
     function brwsrfy(file) {
         return new Promise((resolve, reject) => {
-            if (!file.contents.match(/\brequire\(/)) { return resolve(file); }
+            const importMatch = /^(?:\s*)?import\b|\brequire\(/gm;
+            if (!file.contents.match(importMatch)) { return resolve(file); }
             var s = new require('stream').Readable(),
                 path = require('path').parse(process.cwd() + '/' + file.name);
             s.push(file.contents);
