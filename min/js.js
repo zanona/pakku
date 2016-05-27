@@ -6,6 +6,7 @@ module.exports = function (files) {
         Q = require('q'),
         browserify = require('browserify'),
         babel      = require('babel-core'),
+        babelTransform = require('babelify'),
         es2015     = require('babel-preset-es2015'),
         uglifyjs =  require('uglify-js'),
         regenerator = require('regenerator'),
@@ -47,6 +48,11 @@ module.exports = function (files) {
             s.push(null);
             //send alterred file stream to browserify
             browserify(s, { basedir: path.dir })
+                .transform(regenerator)
+                .transform(babelTransform, {
+                    filename: file.name,
+                    presets: [es2015]
+                })
                 .bundle(function (error, buffer) {
                     if (error) { return reject(error); }
                     file.contents = buffer.toString();
