@@ -98,7 +98,7 @@ module.exports = function (files) {
                 .then(uglify)
                 .catch(formatError);
         } else if (file.name.match(/\.json$/)) {
-            return jsonify(file, formatError);
+            return minifyJSON(file, formatError);
         } else {
             log.warn(
                 '[' + file.name + ']',
