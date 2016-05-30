@@ -1,4 +1,4 @@
-/*eslint indent:4*/
+/*eslint indent:[1,4]*/
 var i = require('../utils/interpolate'),
     validTags = new RegExp(i(
         /<(%s)\b([^>]*)>(?:([\s\S]*?)<\/\1>)?/,
@@ -42,7 +42,14 @@ exports.setContent = function (content) {
         var src = attrs.src || attrs.href,
             inline = src && attrs['data-inline'],
             main = attrs['data-main'],
+            fileType,
             tmpFilename;
+
+        if (attrs.type) {
+          //parse type attribute such type=text/less
+            fileType = attrs.type.split('/')[1];
+            delete attrs.type;
+        }
 
         if (tag === 'script' && main) {
             attrs.src = '__amd_' + main.replace(/\.js$/, '') + '.js';
@@ -61,7 +68,7 @@ exports.setContent = function (content) {
                 '%s-%s.%s',
                 tag,
                 index,
-                tag === 'style' ? 'css' : 'js'
+                fileType || (tag === 'style' ? 'css' : 'js')
             );
             tmpFiles[tmpFilename] = textContent;
             return i(
