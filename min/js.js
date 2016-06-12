@@ -17,7 +17,7 @@ module.exports = function (files) {
             try {
                 file.contents = file.contents
                     .replace(/\n+/g, '')
-                    .replace(/(\s+)/, '$1');
+                    .replace(/(\s)+/g, '$1');
                 resolve(file);
             } catch (e) {
                 reject(e);
@@ -104,7 +104,7 @@ module.exports = function (files) {
                 .then(brwsrfy)
                 .then(uglify)
                 .catch(formatError);
-        } else if (file.name.match(/\.json$/)) {
+        } else if (file.name.match(/\.(json|ld\+json)$/)) {
             return minifyJSON(file, formatError);
         } else {
             log.warn(

@@ -48,7 +48,7 @@ exports.setContent = function (content) {
         if (attrs.type) {
           //parse type attribute such type=text/less
             fileType = attrs.type.split('/')[1];
-            delete attrs.type;
+            if (!fileType.match(/ld\+json/)) { delete attrs.type; }
         }
 
         if (tag === 'script' && main) {
