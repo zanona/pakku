@@ -8,6 +8,8 @@ module.exports = function (files) {
     function run(file) {
         try {
             file.contents = minify(file.contents, {
+                collapseWhitespace: true,
+                preserveLineBreaks: true,
                 removeComments: true,
                 removeAttributeQuotes: true
             });
