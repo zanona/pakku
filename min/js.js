@@ -94,7 +94,7 @@ module.exports = function (files) {
             throw e;
         }
         //skip dependency files
-        if (file.name.match(/bower_components|node_modules/)) {
+        if (file.name.match(/vendor|bower_components|node_modules/)) {
             return file;
         }
 
