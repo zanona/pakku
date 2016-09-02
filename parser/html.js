@@ -1,5 +1,6 @@
 /*eslint indent:[1,4]*/
-var i = require('../utils/interpolate'),
+var marked = require('marked').setOptions({smartypants: true}),
+    i = require('../utils/interpolate'),
     validTags = new RegExp(i(
         /<(%s)\b([^>]*)>(?:([\s\S]*?)<\/\1>)?/,
         'script|link|style'
@@ -7,9 +8,12 @@ var i = require('../utils/interpolate'),
     SSIPattern = /<!--#include file=[\"\']?(.+?)[\"\']? -->/g,
     tmpFiles;
 
-exports.setContent = function (content) {
+exports.setContent = function (content, file) {
     //NEED TO CLEAN CACHE ONCE IT PERSISTS ACCROSS INSTANCES
     tmpFiles = {};
+
+    //IF MARKDOWN, CONVERT TO HTML
+    if (file.href.match(/\.md$/)) content = marked(content);
 
     function flattenAttrs(attrs) {
         var r = Object.keys(attrs).map(function (key) {
@@ -109,10 +113,6 @@ exports.setContent = function (content) {
 
 exports.setResource = function (file, parent) {
     file = JSON.parse(JSON.stringify(file));
-    file.name = file.name.replace(/^__amd_/, function () {
-        file.amd = true;
-        return '';
-    });
     if (tmpFiles[file.href]) {
         file.name = parent.name.replace(/\./g, '-') + '-' + file.href;
         file.contents = tmpFiles[file.href];

@@ -7,13 +7,13 @@ var fs    = require('fs'),
     resolvePath = utils.resolve,
     whitelist   = new RegExp(i(
         /(@)?([\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
-        'jpg|png|gif|svg|ico|less|css|js|json|ld\\+json|html|xml|eot|ttf|woff|otf|pdf|vcf'
+        'jpg|png|gif|svg|ico|less|css|js|json|ld\\+json|html|xml|eot|ttf|woff|otf|pdf|vcf|md|markdown|mdown'
     ), 'ig');
 
 module.exports = function (file, emitter) {
 
     if (file.type === 'html') {
-        file.contents = html.setContent(file.contents); }
+        file.contents = html.setContent(file.contents, file); }
     if (file.type === 'css') { file.contents = css.setContent(file.contents); }
 
     function onURL(href, expand) {
