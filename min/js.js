@@ -100,8 +100,8 @@ module.exports = function (files) {
 
         if (file.name.match(/\.js$/)) {
             return regenerate(file)
-                .then(babelify)
                 .then(brwsrfy)
+                .then(babelify)
                 .then(uglify)
                 .catch(formatError);
         } else if (file.name.match(/\.(json|ld\+json)$/)) {
