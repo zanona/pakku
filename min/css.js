@@ -1,18 +1,18 @@
-/*eslint indent:4*/
+/*eslint indent:[1,4]*/
 module.exports = function (files) {
     'use strict';
     var Q = require('q'),
         less = require('less'),
-        autoprefixer = require('autoprefixer-core'),
+        autoprefixer = require('autoprefixer')({
+            browsers: ['last 2 versions', 'safari >= 8', 'ie >= 11']
+        }),
         postcss = require('postcss'),
-        CleanCSS = require('clean-css'),
-        log = require('../utils/log');
+        CleanCSS = require('clean-css');
 
     function autoprefix(file) {
         return new Promise((resolve, reject) => {
-            postcss([autoprefixer]).process(file.contents, {
-                browsers: ['last 2 version']
-            }).then(function (output) {
+            postcss([autoprefixer]).process(file.contents)
+            .then(function (output) {
                 file.contents = output.css;
                 resolve(file);
             }).catch(reject);
