@@ -7,7 +7,7 @@ var fs    = require('fs'),
     resolvePath = utils.resolve,
     whitelist   = new RegExp(i(
         /(@)?([\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
-        'jpg|png|gif|svg|ico|less|css|js|json|ld\\+json|html|xml|eot|ttf|woff|otf|pdf|vcf|md|markdown|mdown'
+        'jpg|png|gif|svg|ico|less|css|js|json|ld\\+json|html|xml|eot|ttf|woff|otf|pdf|vcf|md|markdown|mdown|mp4'
     ), 'ig');
 
 module.exports = function (file, emitter) {
