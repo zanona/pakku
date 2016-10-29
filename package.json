@@ -34,6 +34,7 @@
     "less": "^2.6.1",
     "marked": "^0.3.6",
     "postcss": "^5.2.4",
+    "postcss-flexbugs-fixes": "^2.0.0",
     "q": "^1.4.1",
     "regenerator": "^0.8.46",
     "uglify-js": "^2.6.0"

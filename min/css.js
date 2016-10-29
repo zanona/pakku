@@ -6,12 +6,13 @@ module.exports = function (files) {
         autoprefixer = require('autoprefixer')({
             browsers: ['last 2 versions', 'safari >= 8', 'ie >= 11']
         }),
+        flexfix = require('postcss-flexbugs-fixes'),
         postcss = require('postcss'),
         CleanCSS = require('clean-css');
 
     function autoprefix(file) {
         return new Promise((resolve, reject) => {
-            postcss([autoprefixer]).process(file.contents)
+            postcss([flexfix, autoprefixer]).process(file.contents)
             .then(function (output) {
                 file.contents = output.css;
                 resolve(file);
