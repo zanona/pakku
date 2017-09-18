@@ -6,7 +6,7 @@ var fs    = require('fs'),
     i     = utils.interpolate,
     resolvePath = utils.resolve,
     whitelist   = new RegExp(i(
-        /(@)?([\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
+        /(@)?([\\\w\-\/\:\.@]+)\.(%s)\b(?=[^=(])/,
         'jpg|png|gif|svg|ico|less|css|js|json|ld\\+json|html|xml|eot|ttf|woff|otf|pdf|vcf|md|markdown|mdown'
     ), 'ig');
 
@@ -19,6 +19,9 @@ module.exports = function (file, emitter) {
     function onURL(href, expand) {
         // Remove expansion flag
         href = href.replace(/^@/, '');
+        // Remove backslash chars
+        href = href.replace(/\\/g, '');
+
         var parent = file.name,
             found;
 
