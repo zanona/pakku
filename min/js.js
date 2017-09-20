@@ -4,12 +4,12 @@ module.exports = function (files) {
     var fs = require('fs'),
         vm = require('vm'),
         Q = require('q'),
-        browserify = require('browserify'),
-        babel      = require('babel-core'),
+        browserify     = require('browserify'),
+        babel          = require('babel-core'),
         babelTransform = require('babelify'),
-        es2015     = require('babel-preset-es2015'),
-        uglifyjs =  require('uglify-js'),
-        regenerator = require('regenerator'),
+        esPresets      = require('babel-preset-env'),
+        uglifyjs       =  require('uglify-js'),
+        regenerator    = require('regenerator'),
         log = require('../utils').log;
 
     function minifyJSON(file) {
@@ -52,7 +52,7 @@ module.exports = function (files) {
                 .transform(regenerator)
                 .transform(babelTransform, {
                     filename: file.name,
-                    presets: [es2015]
+                    presets: [esPresets]
                 })
                 .bundle(function (error, buffer) {
                     if (error) { return reject(error); }
@@ -67,7 +67,7 @@ module.exports = function (files) {
                 file.contents = babel
                     .transform(file.contents, {
                         filename: file.name,
-                        presets: [es2015]
+                        presets: [esPresets]
                     }).code;
                 resolve(file);
             } catch (e) {
