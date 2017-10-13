@@ -44,6 +44,7 @@ exports.setContent = function (content, file) {
         if (attrs['data-dev']) { return ''; }
 
         var src = attrs.src || attrs.href,
+            lineNumber = (content.substr(0, index).match(/\n/g) || []).length + 1,
             inline = src && attrs['data-inline'],
             main = attrs['data-main'],
             fileType,
@@ -71,10 +72,11 @@ exports.setContent = function (content, file) {
             tmpFilename = i(
                 '%s-%s.%s',
                 tag,
-                index,
+                lineNumber,
                 fileType || (tag === 'style' ? 'css' : 'js')
             );
             tmpFiles[tmpFilename] = textContent;
+            tmpFiles[tmpFilename + '_meta'] = { lineNumber: lineNumber };
             return i(
                 '<%s %s>@%s</%s>',
                 tag,
@@ -116,6 +118,10 @@ exports.setResource = function (file, parent) {
     if (tmpFiles[file.href]) {
         file.name = parent.name.replace(/\./g, '-') + '-' + file.href;
         file.contents = tmpFiles[file.href];
+    }
+    // assign extra info added during the setContent method
+    if (tmpFiles[file.href + '_meta']) {
+        Object.assign(file, tmpFiles[file.href + '_meta']);
     }
     return file;
 };
