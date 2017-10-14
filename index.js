@@ -68,6 +68,18 @@ module.exports = function (index, buildDir) {
             .thenResolve('BOOKING YOUR PAGES…').tap(log.info)
             .thenResolve(t.html).then(replace).then(min.html)
 
+            .then(() => {
+              /*
+               * 1. get all js/source maps
+               * 2. if `inline=true`, merge all from same parent by order of ln
+               * 3. adjust `sources` on source map reflecting href/parentHref
+               * 4. create vFiles (*.map) and push to t.build with dir prefix
+               *    set in --source-map option or default
+               * example source map file:
+               * {version: 3, sources: ['index.html'], mappings: '…'}
+               */
+            })
+
             .then(function (a) {
                 if (!options.match('--no-compress-images')) {
                     return Q.resolve(a)
