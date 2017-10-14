@@ -1,5 +1,4 @@
 module.exports = function (index, buildDir) {
-
     var options = Array.prototype.slice.call(arguments).slice(2).join(' '),
         cache   = {},
         queue   = [],
@@ -67,6 +66,91 @@ module.exports = function (index, buildDir) {
 
             .thenResolve('BOOKING YOUR PAGES…').tap(log.info)
             .thenResolve(t.html).then(replace).then(min.html)
+
+            .then(() => {
+              /*
+               * 1. get all js/source maps
+               * 2. if `inline=true`, merge all from same parent by order of ln
+               * 3. adjust `sources` on source map reflecting href/parentHref
+               * 4. create vFiles (*.map) and push to t.build with dir prefix
+               *    set in --source-map option or default
+               * example source map file:
+               * {version: 3, sources: ['index.html'], mappings: '…'}
+               */
+              function clone(obj) { return Object.assign({}, obj); }
+              function getParentDetails(js) {
+                const source = js.sourceMap.sources[0];
+                return t.html
+                  .filter((h)  => {
+                    return h.includes && h.includes.indexOf(source) >= 0
+                        || h.href === source;
+                  }).map((h) => {
+                    // line and col on source mapp offset are based
+                    // on the minified/final file, not the original
+                    const lines  = h.contents.substr(0, h.contents.indexOf(js.contents)).split('\n'),
+                          line   = lines.length - 1,
+                          column = lines.pop().length;
+                    return {file: h.href, script: js.name, line, column};
+                  });
+              }
+              function analyseScript(js) {
+                js.sourceMap = JSON.parse(js.sourceMap);
+                if (js.inline) {
+                  if (js.parentHref) js.sourceMap.sources = [js.parentHref];
+                  return getParentDetails(js);
+                } else {
+                  return [{file: js.href, script: js.name}];
+                }
+              }
+              function flatten (p, c) {
+                p = p.concat(...c);
+                return p;
+              }
+              function groupByFile (p, c) {
+                p[c.file] = p[c.file] || [];
+                p[c.file].push(c);
+                p[c.file].sort((a, b) => a.line > b.line);
+                return p;
+              }
+              function expandHTMLSourceContent(source) {
+                return require('fs').readFileSync(source).toString();
+              }
+              function generateSourceMap(fileHref, sources) {
+                return {
+                  version: 3,
+                  file: fileHref,
+                  sections: sources.map((f) => {
+                    const map = clone(cache[f.script].sourceMap);
+                    map.sourcesContent = map.sources.map(expandHTMLSourceContent);
+                    map.sources = map.sources.map((source) => {
+                      return `/${source}${source.endsWith('.js') ? '' : '.js'}`;
+                    });
+                    return {
+                      offset: { line: f.line || 0, column: f.column || 0 },
+                      map
+                    };
+                  })
+                };
+              }
+              const r = t.js.map(analyseScript)
+                         .reduce(flatten)
+                         .reduce(groupByFile, {}),
+                    maps = Object.keys(r).map((k) => generateSourceMap(k, r[k]));
+              maps
+                .filter((m) => {
+                  // only build flagged files (present in t.build)
+                  return t.build.indexOf(cache[m.file]) >= 0;
+                })
+                .forEach((m) => {
+                  const name     = `sourcemaps/${m.file.replace(/\//g, '-')}.map`,
+                        contents = JSON.stringify(m, null, 2),
+                        file     = cache[m.file],
+                        ref      = `\n//# sourceMappingURL=${name}\n`;
+                  if (file.type === 'html') file.contents += `\n<script>${ref}<\/script>`;
+                  if (file.type === 'js')   file.contents += ref;
+                  t.build.push({name, contents});
+                });
+            })
 
             .then(function (a) {
                 if (!options.match('--no-compress-images')) {

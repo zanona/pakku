@@ -43,12 +43,14 @@ exports.setContent = function (content, file) {
 
         if (attrs['data-dev']) { return ''; }
 
-        var src = attrs.src || attrs.href,
-            lineNumber = (content.substr(0, index).match(/\n/g) || []).length + 1,
+        var src    = attrs.src || attrs.href,
+            line   = (content.substr(0, index).match(/\n/g) || []).length + 1, //non-zero based count
+            column = match.indexOf(textContent) + 1, //non-zero based count
             inline = src && attrs['data-inline'],
-            main = attrs['data-main'],
+            main   = attrs['data-main'],
             fileType,
-            tmpFilename;
+            tmpFilename,
+            meta = {};
 
         if (attrs.type) {
           //parse type attribute such type=text/less
@@ -60,10 +62,13 @@ exports.setContent = function (content, file) {
             attrs.src = '__amd_' + main.replace(/\.js$/, '') + '.js';
             delete attrs['data-main'];
         }
+
         if (inline) {
             delete attrs.src;
             delete attrs.href;
             delete attrs['data-inline'];
+            file.includes = file.includes || [];
+            file.includes.push(src);
         }
 
         attrs = flattenAttrs(attrs);
@@ -72,11 +77,13 @@ exports.setContent = function (content, file) {
             tmpFilename = i(
                 '%s-%s.%s',
                 tag,
-                lineNumber,
+                `${line}_${column}`,
                 fileType || (tag === 'style' ? 'css' : 'js')
             );
             tmpFiles[tmpFilename] = textContent;
-            tmpFiles[tmpFilename + '_meta'] = { lineNumber: lineNumber };
+            meta.line = line;
+            meta.column = column;
+            tmpFiles[tmpFilename + '_meta'] = meta;
             return i(
                 '<%s %s>@%s</%s>',
                 tag,
@@ -101,7 +108,12 @@ exports.setContent = function (content, file) {
         return match;
     }
 
-    function parseSSI(m, filePath) { return '@' + filePath; }
+    function parseSSI(m, filePath) {
+        //assign the inclusion on the vFile
+        file.includes = file.includes || [];
+        file.includes.push(filePath);
+        return '@' + filePath;
+    }
 
     function stripCommentsExceptSSI(str) {
         return str.replace(/<!--(?!#include)[\s\S]*?-->/gmi, '');

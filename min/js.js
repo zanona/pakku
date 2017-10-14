@@ -12,6 +12,16 @@ module.exports = function (files) {
         regenerator    = require('regenerator'),
         log = require('../utils').log;
 
+    function getOffsetContent(file) {
+      // adjust inline script contents with the line number it was located
+      if (!file.inline) return file.contents;
+      // using zero-base index to match with source map spec
+      const fmtLine = file.line   ? file.line   - 1 : 0,
+            fmtCol  = file.column ? file.column - 1 : 0;
+      return Array(fmtLine).fill('\n').join('')
+           + Array(fmtCol).fill(' ').join('')
+           + file.contents;
+    }
     function minifyJSON(file) {
         return new Promise((resolve, reject) => {
             try {
@@ -26,13 +36,26 @@ module.exports = function (files) {
     }
     function uglify(file) {
         var options = {
-            fromString: true,
-            output: { inline_script: true, beautify: false }
+            output: {
+              inline_script: true,
+              beautify: false
+            },
+            sourceMap: {
+              content: file.sourceMap
+              /*
+               * need to set the `url` param based on cmd option
+               * such as --source-map-expose=true, which will then
+               * print //# sourceMapURL at the end of scripts
+               */
+              //,url: `sourcemaps/${file.name}.map`
+            }
         };
 
         return new Promise((resolve, reject) => {
             try {
-                file.contents = uglifyjs.minify(file.contents, options).code;
+                const minified = uglifyjs.minify(file.contents, options);
+                file.sourceMap = minified.map;
+                file.contents  = minified.code;
                 resolve(file);
             } catch (e) {
                 reject(e);
@@ -61,14 +84,18 @@ module.exports = function (files) {
                 });
         });
     }
+
     function babelify(file) {
         return new Promise((resolve, reject) => {
             try {
-                file.contents = babel
-                    .transform(file.contents, {
+                const transpiled = babel
+                    .transform(getOffsetContent(file), {
                         filename: file.name,
-                        presets: [esPresets]
-                    }).code;
+                        presets: [esPresets],
+                        sourceMaps: true
+                    });
+                file.sourceMap = transpiled.map;
+                file.contents  = transpiled.code;
                 resolve(file);
             } catch (e) {
                 reject(e);
