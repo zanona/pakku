@@ -118,6 +118,7 @@ exports.setResource = function (file, parent) {
     if (tmpFiles[file.href]) {
         file.name = parent.name.replace(/\./g, '-') + '-' + file.href;
         file.contents = tmpFiles[file.href];
+        file.parentHref = parent.href;
     }
     // assign extra info added during the setContent method
     if (tmpFiles[file.href + '_meta']) {
