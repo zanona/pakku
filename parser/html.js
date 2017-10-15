@@ -101,7 +101,12 @@ exports.setContent = function (content, file) {
         return match;
     }
 
-    function parseSSI(m, filePath) { return '@' + filePath; }
+    function parseSSI(m, filePath) {
+        //assign the inclusion on the vFile
+        file.includes = file.includes || [];
+        file.includes.push(filePath);
+        return '@' + filePath;
+    }
 
     function stripCommentsExceptSSI(str) {
         return str.replace(/<!--(?!#include)[\s\S]*?-->/gmi, '');

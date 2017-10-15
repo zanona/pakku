@@ -1,5 +1,4 @@
 module.exports = function (index, buildDir) {
-
     var options = Array.prototype.slice.call(arguments).slice(2).join(' '),
         cache   = {},
         queue   = [],
@@ -78,6 +77,53 @@ module.exports = function (index, buildDir) {
                * example source map file:
                * {version: 3, sources: ['index.html'], mappings: '…'}
                */
+              const maps = {},
+                    fs = require('fs');
+              function pushMapping(mapping = '', newMapping) {
+                // take second A on mappings to move the source to the next
+                // based on source map [minCol,sourcesIndex,rawline,rawCol,namesIndex]
+                // where C is previous (A) + 1 = C so it will always use the next
+                // in source for each new file
+                // mappings.replace(/(?!^)A/, 'C')/
+                if (!mapping) return newMapping;
+                mapping += ',' + newMapping.replace(/(?!^)A/, 'C');
+                return mapping;
+              }
+              function addMapToFile(href, sourceMap) {
+                const map = maps[href] = maps[href] || {
+                  version: 3,
+                  sources: [],
+                  names: [],
+                  mappings: '',
+                  sourcesContent: []
+                };
+                map.version = map.version || sourceMap.version,
+                map.sources.push(sourceMap.sources[0]);
+                map.names = map.names.concat(sourceMap.names);
+                map.mappings = pushMapping(map.mappings, sourceMap.mappings);
+                map.sourcesContent.push(fs.readFileSync(sourceMap.sources[0]).toString());
+                map.sourcesContent = map.sourcesContent.concat(sourceMap.sourcesContent);
+                return map;
+              }
+              t.js.forEach((js) => {
+                if (js.inline && js.sourceMap) {
+                  js.sourceMap = JSON.parse(js.sourceMap);
+                  js.sourceMap.sources = [js.parentHref];
+                  addMapToFile(js.parentHref, js.sourceMap);
+                  t.html
+                    .filter((h)  => h.includes && h.includes.indexOf(js.parentHref) >= 0)
+                    .forEach((h) => addMapToFile(h.name, js.sourceMap));
+                }
+              });
+
+              //return console.log(maps);
+              Object.keys(maps).forEach((k) => {
+                t.build.push({
+                  name: `sourcemaps/${k}.map`,
+                  contents: JSON.stringify(maps[k])
+                });
+              });
+              cache['index.html'].contents += '<script>\n//# sourceMappingURL=sourcemaps/index.html.map\n<\/script>';
             })
 
             .then(function (a) {

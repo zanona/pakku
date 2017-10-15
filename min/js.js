@@ -15,7 +15,9 @@ module.exports = function (files) {
     function getOffsetContent(file) {
       // adjust inline script contents with the lineNumber it was located
       if (!file.inline) return file.contents;
-      return Array(file.lineNumber || 0).fill('\n').join('') + file.contents;
+      // using zero-base index to match with source map spec
+      const lines = (file.lineNumber || 1) - 1;
+      return Array(lines).fill('\n').join('') + file.contents;
     }
     function minifyJSON(file) {
         return new Promise((resolve, reject) => {
@@ -42,7 +44,7 @@ module.exports = function (files) {
                * such as --source-map-expose=true, which will then
                * print //# sourceMapURL at the end of scripts
                */
-              //url: `${file.name}.map`
+              //,url: `sourcemaps/${file.name}.map`
             }
         };
 
@@ -50,7 +52,7 @@ module.exports = function (files) {
             try {
                 const minified = uglifyjs.minify(file.contents, options);
                 file.sourceMap = minified.map;
-                file.contents  = minified.code;
+                file.contents  = '\n' + minified.code;
                 resolve(file);
             } catch (e) {
                 reject(e);
