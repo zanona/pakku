@@ -16,8 +16,9 @@ module.exports = function (files) {
       // adjust inline script contents with the lineNumber it was located
       if (!file.inline) return file.contents;
       // using zero-base index to match with source map spec
-      const lines = (file.lineNumber || 1) - 1;
-      return Array(lines).fill('\n').join('') + file.contents;
+      const lines = (file.lineNumber || 1) - 1,
+            spacer = Array('<script>'.length).fill('').join(' ')
+      return Array(lines).fill('\n').join('') + spacer + file.contents;
     }
     function minifyJSON(file) {
         return new Promise((resolve, reject) => {
@@ -86,7 +87,7 @@ module.exports = function (files) {
         return new Promise((resolve, reject) => {
             try {
                 const transpiled = babel
-                    .transform(file.contents, {
+                    .transform(getOffsetContent(file), {
                         filename: file.name,
                         presets: [esPresets],
                         sourceMaps: true

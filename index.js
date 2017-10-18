@@ -102,16 +102,20 @@ module.exports = function (index, buildDir) {
                 p[c.file].sort((a, b) => a.line > b.line);
                 return p;
               }
+              function expandHTMLSourceContent(source) {
+                return require('fs').readFileSync(source).toString();
+              }
               function generateSourceMap(file, sources) {
                 return {
                   version: 3,
                   file,
                   sections: sources.map((f) => {
+                    const map = Object.assign({}, cache[f.script].sourceMap);
+                    map.sourcesContent = map.sources.map(expandHTMLSourceContent);
+                    map.sources = map.sources.map((source) => `/${source}.js`);
                     return {
                       offset: { line: f.line - 1, column: '<script>'.length },
-                      map: Object.assign({
-                        sourceRoot: '/'
-                      }, cache[f.script].sourceMap)
+                      map
                     };
                   })
                 };
@@ -120,7 +124,7 @@ module.exports = function (index, buildDir) {
                          .reduce(flatten)
                          .reduce(groupByFile, {}),
                     maps = Object.keys(r).map((k) => generateSourceMap(k, r[k]));
-              //console.log(JSON.stringify(maps, null, 2));
+              console.log(JSON.stringify(maps, null, 2));
               maps.forEach((m) => {
                 t.build.push({
                   name: `sourcemaps/${m.file}.map`,
