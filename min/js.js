@@ -52,7 +52,7 @@ module.exports = function (files) {
             try {
                 const minified = uglifyjs.minify(file.contents, options);
                 file.sourceMap = minified.map;
-                file.contents  = '\n' + minified.code;
+                file.contents  = minified.code;
                 resolve(file);
             } catch (e) {
                 reject(e);
@@ -86,7 +86,7 @@ module.exports = function (files) {
         return new Promise((resolve, reject) => {
             try {
                 const transpiled = babel
-                    .transform(getOffsetContent(file), {
+                    .transform(file.contents, {
                         filename: file.name,
                         presets: [esPresets],
                         sourceMaps: true

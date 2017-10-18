@@ -77,53 +77,57 @@ module.exports = function (index, buildDir) {
                * example source map file:
                * {version: 3, sources: ['index.html'], mappings: '…'}
                */
-              const maps = {},
-                    fs = require('fs');
-              function pushMapping(mapping = '', newMapping) {
-                // take second A on mappings to move the source to the next
-                // based on source map [minCol,sourcesIndex,rawline,rawCol,namesIndex]
-                // where C is previous (A) + 1 = C so it will always use the next
-                // in source for each new file
-                // mappings.replace(/(?!^)A/, 'C')/
-                if (!mapping) return newMapping;
-                mapping += ',' + newMapping.replace(/(?!^)A/, 'C');
-                return mapping;
+              function getParentDetails(name, href, contents) {
+                return t.html.filter((h)  => {
+                  return h.includes && h.includes.indexOf(href) >= 0 || h.href === href;
+                }).map((h) => {
+                  const ln = h.contents.substr(0, h.contents.indexOf(contents)).split('\n').length;
+                  return {file: h.href, script: name, line: ln};
+                });
               }
-              function addMapToFile(href, sourceMap) {
-                const map = maps[href] = maps[href] || {
-                  version: 3,
-                  sources: [],
-                  names: [],
-                  mappings: '',
-                  sourcesContent: []
-                };
-                map.version = map.version || sourceMap.version,
-                map.sources.push(sourceMap.sources[0]);
-                map.names = map.names.concat(sourceMap.names);
-                map.mappings = pushMapping(map.mappings, sourceMap.mappings);
-                map.sourcesContent.push(fs.readFileSync(sourceMap.sources[0]).toString());
-                map.sourcesContent = map.sourcesContent.concat(sourceMap.sourcesContent);
-                return map;
-              }
-              t.js.forEach((js) => {
+              function analyseScript(js) {
                 if (js.inline && js.sourceMap) {
                   js.sourceMap = JSON.parse(js.sourceMap);
                   js.sourceMap.sources = [js.parentHref];
-                  addMapToFile(js.parentHref, js.sourceMap);
-                  t.html
-                    .filter((h)  => h.includes && h.includes.indexOf(js.parentHref) >= 0)
-                    .forEach((h) => addMapToFile(h.name, js.sourceMap));
+                  return getParentDetails(js.name, js.parentHref, js.contents);
                 }
-              });
-
-              //return console.log(maps);
-              Object.keys(maps).forEach((k) => {
+              }
+              function flatten (p, c) {
+                p = p.concat(...c);
+                return p;
+              }
+              function groupByFile (p, c) {
+                p[c.file] = p[c.file] || [];
+                p[c.file].push(c);
+                p[c.file].sort((a, b) => a.line > b.line);
+                return p;
+              }
+              function generateSourceMap(file, sources) {
+                return {
+                  version: 3,
+                  file,
+                  sections: sources.map((f) => {
+                    return {
+                      offset: { line: f.line - 1, column: '<script>'.length },
+                      map: Object.assign({
+                        sourceRoot: '/'
+                      }, cache[f.script].sourceMap)
+                    };
+                  })
+                };
+              }
+              const r = t.js.map(analyseScript)
+                         .reduce(flatten)
+                         .reduce(groupByFile, {}),
+                    maps = Object.keys(r).map((k) => generateSourceMap(k, r[k]));
+              //console.log(JSON.stringify(maps, null, 2));
+              maps.forEach((m) => {
                 t.build.push({
-                  name: `sourcemaps/${k}.map`,
-                  contents: JSON.stringify(maps[k])
+                  name: `sourcemaps/${m.file}.map`,
+                  contents: JSON.stringify(m)
                 });
+                cache[m.file].contents += `\n<script>\n//# sourceMappingURL=sourcemaps/${m.file}.map\n<\/script>`;
               });
-              cache['index.html'].contents += '<script>\n//# sourceMappingURL=sourcemaps/index.html.map\n<\/script>';
             })
 
             .then(function (a) {
