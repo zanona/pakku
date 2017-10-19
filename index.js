@@ -77,6 +77,9 @@ module.exports = function (index, buildDir) {
                * example source map file:
                * {version: 3, sources: ['index.html'], mappings: '…'}
                */
+              function clone(obj) {
+                return Object.assign({}, obj);
+              }
               function getParentDetails(js) {
                 return t.html.filter((h)  => {
                   return h.includes && h.includes.indexOf(js.parentHref) >= 0
@@ -85,16 +88,19 @@ module.exports = function (index, buildDir) {
                   // line and col on source mapp offset are based
                   // on the minified/final file, not the original
                   const lines  = h.contents.substr(0, h.contents.indexOf(js.contents)).split('\n'),
-                        line   = lines.length,
+                        line   = lines.length - 1,
                         column = lines.pop().length - 1;
                   return {file: h.href, script: js.name, line, column};
                 });
               }
               function analyseScript(js) {
+                js.sourceMap = JSON.parse(js.sourceMap);
                 if (js.inline && js.sourceMap) {
-                  js.sourceMap = JSON.parse(js.sourceMap);
                   js.sourceMap.sources = [js.parentHref];
                   return getParentDetails(js);
+                }
+                if (!js.inline) {
+                  return [{file: js.href, script: js.name}];
                 }
               }
               function flatten (p, c) {
@@ -110,16 +116,18 @@ module.exports = function (index, buildDir) {
               function expandHTMLSourceContent(source) {
                 return require('fs').readFileSync(source).toString();
               }
-              function generateSourceMap(file, sources) {
+              function generateSourceMap(fileHref, sources) {
                 return {
                   version: 3,
-                  file,
+                  file: fileHref,
                   sections: sources.map((f) => {
-                    const map = Object.assign({}, cache[f.script].sourceMap);
+                    const map = clone(cache[f.script].sourceMap);
                     map.sourcesContent = map.sources.map(expandHTMLSourceContent);
-                    map.sources = map.sources.map((source) => `/${source}.js`);
+                    map.sources = map.sources.map((source) => {
+                      return `/${source}${source.endsWith('.js') ? '' : '.js'}`;
+                    });
                     return {
-                      offset: { line: f.line - 1, column: f.column },
+                      offset: { line: f.line || 0, column: f.column || 0 },
                       map
                     };
                   })
@@ -129,13 +137,20 @@ module.exports = function (index, buildDir) {
                          .reduce(flatten)
                          .reduce(groupByFile, {}),
                     maps = Object.keys(r).map((k) => generateSourceMap(k, r[k]));
-              maps.forEach((m) => {
-                t.build.push({
-                  name: `sourcemaps/${m.file}.map`,
-                  contents: JSON.stringify(m)
+              maps
+                .filter((m) => {
+                  // only build flagged files (present in t.build)
+                  return t.build.indexOf(cache[m.file]) >= 0;
+                })
+                .forEach((m) => {
+                  const name     = `sourcemaps/${m.file.replace(/\//g, '-')}.map`,
+                        contents = JSON.stringify(m, null, 2),
+                        file     = cache[m.file],
+                        ref      = `\n//# sourceMappingURL=${name}\n`;
+                  if (file.type === 'html') file.contents += `\n<script>${ref}<\/script>`;
+                  if (file.type === 'js')   file.contents += ref;
+                  t.build.push({name, contents});
                 });
-                cache[m.file].contents += `\n<script>\n//# sourceMappingURL=sourcemaps/${m.file}.map\n<\/script>`;
-              });
             })
 
             .then(function (a) {
