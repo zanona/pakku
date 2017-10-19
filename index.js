@@ -77,29 +77,28 @@ module.exports = function (index, buildDir) {
                * example source map file:
                * {version: 3, sources: ['index.html'], mappings: '…'}
                */
-              function clone(obj) {
-                return Object.assign({}, obj);
-              }
+              function clone(obj) { return Object.assign({}, obj); }
               function getParentDetails(js) {
-                return t.html.filter((h)  => {
-                  return h.includes && h.includes.indexOf(js.parentHref) >= 0
-                      || h.href === js.parentHref;
-                }).map((h) => {
-                  // line and col on source mapp offset are based
-                  // on the minified/final file, not the original
-                  const lines  = h.contents.substr(0, h.contents.indexOf(js.contents)).split('\n'),
-                        line   = lines.length - 1,
-                        column = lines.pop().length - 1;
-                  return {file: h.href, script: js.name, line, column};
-                });
+                const source = js.sourceMap.sources[0];
+                return t.html
+                  .filter((h)  => {
+                    return h.includes && h.includes.indexOf(source) >= 0
+                        || h.href === source;
+                  }).map((h) => {
+                    // line and col on source mapp offset are based
+                    // on the minified/final file, not the original
+                    const lines  = h.contents.substr(0, h.contents.indexOf(js.contents)).split('\n'),
+                          line   = lines.length - 1,
+                          column = lines.pop().length - 1;
+                    return {file: h.href, script: js.name, line, column};
+                  });
               }
               function analyseScript(js) {
                 js.sourceMap = JSON.parse(js.sourceMap);
-                if (js.inline && js.sourceMap) {
-                  js.sourceMap.sources = [js.parentHref];
+                if (js.inline) {
+                  if (js.parentHref) js.sourceMap.sources = [js.parentHref];
                   return getParentDetails(js);
-                }
-                if (!js.inline) {
+                } else {
                   return [{file: js.href, script: js.name}];
                 }
               }

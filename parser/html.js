@@ -49,7 +49,8 @@ exports.setContent = function (content, file) {
             inline = src && attrs['data-inline'],
             main   = attrs['data-main'],
             fileType,
-            tmpFilename;
+            tmpFilename,
+            meta = {};
 
         if (attrs.type) {
           //parse type attribute such type=text/less
@@ -61,10 +62,13 @@ exports.setContent = function (content, file) {
             attrs.src = '__amd_' + main.replace(/\.js$/, '') + '.js';
             delete attrs['data-main'];
         }
+
         if (inline) {
             delete attrs.src;
             delete attrs.href;
             delete attrs['data-inline'];
+            file.includes = file.includes || [];
+            file.includes.push(src);
         }
 
         attrs = flattenAttrs(attrs);
@@ -77,7 +81,9 @@ exports.setContent = function (content, file) {
                 fileType || (tag === 'style' ? 'css' : 'js')
             );
             tmpFiles[tmpFilename] = textContent;
-            tmpFiles[tmpFilename + '_meta'] = { line, column };
+            meta.line = line;
+            meta.column = column;
+            tmpFiles[tmpFilename + '_meta'] = meta;
             return i(
                 '<%s %s>@%s</%s>',
                 tag,
