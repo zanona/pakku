@@ -89,7 +89,7 @@ module.exports = function (index, buildDir) {
                     // on the minified/final file, not the original
                     const lines  = h.contents.substr(0, h.contents.indexOf(js.contents)).split('\n'),
                           line   = lines.length - 1,
-                          column = lines.pop().length - 1;
+                          column = lines.pop().length;
                     return {file: h.href, script: js.name, line, column};
                   });
               }
