@@ -13,12 +13,14 @@ module.exports = function (files) {
         log = require('../utils').log;
 
     function getOffsetContent(file) {
-      // adjust inline script contents with the lineNumber it was located
+      // adjust inline script contents with the line number it was located
       if (!file.inline) return file.contents;
       // using zero-base index to match with source map spec
-      const lines = (file.lineNumber || 1) - 1,
-            spacer = Array('<script>'.length).fill('').join(' ')
-      return Array(lines).fill('\n').join('') + spacer + file.contents;
+      const fmtLine = file.line   ? file.line   - 1 : 0,
+            fmtCol  = file.column ? file.column - 1 : 0;
+      return Array(fmtLine).fill('\n').join('')
+           + Array(fmtCol).fill(' ').join('')
+           + file.contents;
     }
     function minifyJSON(file) {
         return new Promise((resolve, reject) => {

@@ -43,10 +43,11 @@ exports.setContent = function (content, file) {
 
         if (attrs['data-dev']) { return ''; }
 
-        var src = attrs.src || attrs.href,
-            lineNumber = (content.substr(0, index).match(/\n/g) || []).length + 1,
+        var src    = attrs.src || attrs.href,
+            line   = (content.substr(0, index).match(/\n/g) || []).length + 1, //non-zero based count
+            column = match.indexOf(textContent) + 1, //non-zero based count
             inline = src && attrs['data-inline'],
-            main = attrs['data-main'],
+            main   = attrs['data-main'],
             fileType,
             tmpFilename;
 
@@ -72,11 +73,11 @@ exports.setContent = function (content, file) {
             tmpFilename = i(
                 '%s-%s.%s',
                 tag,
-                lineNumber,
+                `${line}_${column}`,
                 fileType || (tag === 'style' ? 'css' : 'js')
             );
             tmpFiles[tmpFilename] = textContent;
-            tmpFiles[tmpFilename + '_meta'] = { lineNumber: lineNumber };
+            tmpFiles[tmpFilename + '_meta'] = { line, column };
             return i(
                 '<%s %s>@%s</%s>',
                 tag,

@@ -77,19 +77,24 @@ module.exports = function (index, buildDir) {
                * example source map file:
                * {version: 3, sources: ['index.html'], mappings: '…'}
                */
-              function getParentDetails(name, href, contents) {
+              function getParentDetails(js) {
                 return t.html.filter((h)  => {
-                  return h.includes && h.includes.indexOf(href) >= 0 || h.href === href;
+                  return h.includes && h.includes.indexOf(js.parentHref) >= 0
+                      || h.href === js.parentHref;
                 }).map((h) => {
-                  const ln = h.contents.substr(0, h.contents.indexOf(contents)).split('\n').length;
-                  return {file: h.href, script: name, line: ln};
+                  // line and col on source mapp offset are based
+                  // on the minified/final file, not the original
+                  const lines  = h.contents.substr(0, h.contents.indexOf(js.contents)).split('\n'),
+                        line   = lines.length,
+                        column = lines.pop().length - 1;
+                  return {file: h.href, script: js.name, line, column};
                 });
               }
               function analyseScript(js) {
                 if (js.inline && js.sourceMap) {
                   js.sourceMap = JSON.parse(js.sourceMap);
                   js.sourceMap.sources = [js.parentHref];
-                  return getParentDetails(js.name, js.parentHref, js.contents);
+                  return getParentDetails(js);
                 }
               }
               function flatten (p, c) {
@@ -114,7 +119,7 @@ module.exports = function (index, buildDir) {
                     map.sourcesContent = map.sources.map(expandHTMLSourceContent);
                     map.sources = map.sources.map((source) => `/${source}.js`);
                     return {
-                      offset: { line: f.line - 1, column: '<script>'.length },
+                      offset: { line: f.line - 1, column: f.column },
                       map
                     };
                   })
@@ -124,7 +129,6 @@ module.exports = function (index, buildDir) {
                          .reduce(flatten)
                          .reduce(groupByFile, {}),
                     maps = Object.keys(r).map((k) => generateSourceMap(k, r[k]));
-              console.log(JSON.stringify(maps, null, 2));
               maps.forEach((m) => {
                 t.build.push({
                   name: `sourcemaps/${m.file}.map`,
