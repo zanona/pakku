@@ -64,8 +64,6 @@ module.exports = function (files) {
     }
     function brwsrfy(file) {
         return new Promise((resolve, reject) => {
-            const importMatch = /^(?:\s*)?import\b|\brequire\(/gm;
-            if (!file.contents.match(importMatch)) { return resolve(file); }
             var s = new require('stream').Readable(),
                 path = require('path').parse(process.cwd() + '/' + file.name);
             s.push(file.contents);
@@ -127,11 +125,15 @@ module.exports = function (files) {
         }
 
         if (file.name.match(/\.js$/)) {
-            return regenerate(file)
-                .then(brwsrfy)
-                .then(babelify)
-                .then(uglify)
-                .catch(formatError);
+            if (file.contents.match(/module.exports/)) return file;
+            let transpile;
+            if (file.hasImports) {
+                transpile = brwsrfy(file);
+            } else {
+                transpile = regenerate(file).then(babelify);
+            }
+            return transpile.then(uglify).catch(formatError);
+
         } else if (file.name.match(/\.(json|ld\+json)$/)) {
             return minifyJSON(file, formatError);
         } else {
