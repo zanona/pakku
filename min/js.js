@@ -26,8 +26,10 @@ module.exports = function (files) {
     }
     function uglify(file) {
         var options = {
-            fromString: true,
-            output: { inline_script: true, beautify: false }
+            output: {
+              inline_script: true,
+              beautify: false
+            }
         };
 
         return new Promise((resolve, reject) => {
