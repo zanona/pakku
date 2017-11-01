@@ -51,10 +51,11 @@ module.exports = function (files) {
             s.push(null);
             //send alterred file stream to browserify
             browserify(s, { basedir: path.dir })
-                .transform(regenerator)
+                .transform(regenerator, {global: true})
                 .transform(babelTransform, {
                     filename: file.name,
-                    presets: [esPresets]
+                    presets: [esPresets],
+                    global: true
                 })
                 .bundle(function (error, buffer) {
                     if (error) { return reject(error); }
