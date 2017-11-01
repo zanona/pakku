@@ -12,6 +12,13 @@ module.exports = function (files) {
         regenerator    = require('regenerator'),
         log = require('../utils').log;
 
+    function replaceNodeEnvVars(file) {
+        const nodePattern = /process.env(?:\.(.+?)\b|\[(["'])(.+?)\2\])/g;
+        file.contents = file.contents.replace(nodePattern, (m,v1,_,v3) => {
+            return `'${process.env[v1 || v3] || ''}'`;
+        });
+        return Promise.resolve(file);
+    }
     function minifyJSON(file) {
         return new Promise((resolve, reject) => {
             try {
@@ -107,7 +114,9 @@ module.exports = function (files) {
             } else {
                 transpile = regenerate(file).then(babelify);
             }
-            return transpile.then(uglify).catch(formatError);
+            return transpile.then(replaceNodeEnvVars)
+                            .then(uglify)
+                            .catch(formatError);
 
         } else if (file.name.match(/\.(json|ld\+json)$/)) {
             return minifyJSON(file, formatError);
