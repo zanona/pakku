@@ -80,7 +80,7 @@ module.exports = function (index, buildDir) {
                */
               function clone(obj) { return Object.assign({}, obj); }
               function getParentDetails(js) {
-                const source = js.sourceMap.sources[0];
+                const source = js.sourceMap.sources.find((s) => s.endsWith('.html'));
                 return t.html
                   .filter((h)  => {
                     return h.includes && h.includes.indexOf(source) >= 0
@@ -95,9 +95,7 @@ module.exports = function (index, buildDir) {
                   });
               }
               function analyseScript(js) {
-                js.sourceMap = JSON.parse(js.sourceMap);
                 if (js.inline) {
-                  if (js.parentHref) js.sourceMap.sources = [js.parentHref];
                   return getParentDetails(js);
                 } else {
                   return [{file: js.href, script: js.name}];
@@ -121,8 +119,11 @@ module.exports = function (index, buildDir) {
                   version: 3,
                   file: fileHref,
                   sections: sources.map((f) => {
-                    const map = clone(cache[f.script].sourceMap);
-                    map.sourcesContent = map.sources.map(expandHTMLSourceContent);
+                    const file = cache[f.script],
+                          map  = clone(file.sourceMap);
+                    if (!file.hasImports) {
+                      map.sourcesContent = map.sources.map(expandHTMLSourceContent);
+                    }
                     map.sources = map.sources.map((source) => {
                       return `/${source}${source.endsWith('.js') ? '' : '.js'}`;
                     });
@@ -133,7 +134,9 @@ module.exports = function (index, buildDir) {
                   })
                 };
               }
-              const r = t.js.map(analyseScript)
+              const r = t.js
+                         .filter((f) => f.sourceMap)
+                         .map(analyseScript)
                          .reduce(flatten)
                          .reduce(groupByFile, {}),
                     maps = Object.keys(r).map((k) => generateSourceMap(k, r[k]));
