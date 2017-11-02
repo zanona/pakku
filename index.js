@@ -70,12 +70,16 @@ module.exports = function (index, buildDir) {
             .thenResolve('BOOKING YOUR PAGES…').tap(log.info)
             .thenResolve(t.html).then(replace).then(min.html)
 
-            .thenResolve('GENERATING SOURCE MAPS…').tap(log.info)
-            .thenResolve(t.all).then(sourcemaps).then((files) => {
-              console.log(files.map((f) => f.name));
-              t.all = t.all.concat(...files);
-              t.map = t.map.concat(...files);
-              return files;
+            .then((a) => {
+              if (!options.match('--source-maps')) return a;
+              return Q.resolve()
+                .thenResolve('GENERATING SOURCE MAPS…').tap(log.info)
+                .thenResolve(t.all).then(sourcemaps).then((files) => {
+                  console.log(files.map((f) => f.name));
+                  t.all = t.all.concat(...files);
+                  t.map = t.map.concat(...files);
+                  return files;
+                });
             })
 
             .then(function (a) {
