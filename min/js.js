@@ -2,6 +2,7 @@
 module.exports = function (files) {
     'use strict';
     var fs = require('fs'),
+        path = require('path'),
         vm = require('vm'),
         Q = require('q'),
         browserify     = require('browserify'),
@@ -28,6 +29,23 @@ module.exports = function (files) {
             return `'${process.env[v1 || v3] || ''}'`;
         });
         return Promise.resolve(file);
+    }
+    function extractInlineSourceMap(contents) {
+        const sourceMap = contents.split('//# sourceMappingURL=data:application/json;charset:utf-8;base64,')[1];
+        return Buffer(sourceMap || '', 'base64').toString();
+    }
+    function rerouteSourceMap(file) {
+      if (!file.sourceMap) return file;
+      const map = file.sourceMap = JSON.parse(file.sourceMap),
+            base = file.parentHref || file.name;
+      map.sources = map.sources.map((source) => {
+        if (source === '_stream_0.js') return base;
+        if (source.match('node_modules')) return source.split(/(?=node_modules)/)[1];
+        if (file.hasImports) return path.join(path.dirname(base), source);
+        if (file.inline) return file.parentHref;
+        return source;
+      });
+      return file;
     }
     function minifyJSON(file) {
         return new Promise((resolve, reject) => {
@@ -76,7 +94,7 @@ module.exports = function (files) {
             s.push(file.contents);
             s.push(null);
             //send alterred file stream to browserify
-            browserify(s, { basedir: path.dir })
+            browserify(s, { basedir: path.dir, debug: true })
                 .transform(regenerator, {global: true})
                 .transform(babelTransform, {
                     filename: file.name,
@@ -86,6 +104,7 @@ module.exports = function (files) {
                 .bundle(function (error, buffer) {
                     if (error) { return reject(error); }
                     file.contents = buffer.toString();
+                    file.sourceMap = extractInlineSourceMap(file.contents);
                     resolve(file);
                 });
         });
@@ -141,6 +160,7 @@ module.exports = function (files) {
             }
             return transpile.then(replaceNodeEnvVars)
                             .then(uglify)
+                            .then(rerouteSourceMap)
                             .catch(formatError);
 
         } else if (file.name.match(/\.(json|ld\+json)$/)) {
