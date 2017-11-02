@@ -22,6 +22,13 @@ module.exports = function (files) {
            + Array(fmtCol).fill(' ').join('')
            + file.contents;
     }
+    function replaceNodeEnvVars(file) {
+        const nodePattern = /process.env(?:\.(.+?)\b|\[(["'])(.+?)\2\])/g;
+        file.contents = file.contents.replace(nodePattern, (m,v1,_,v3) => {
+            return `'${process.env[v1 || v3] || ''}'`;
+        });
+        return Promise.resolve(file);
+    }
     function minifyJSON(file) {
         return new Promise((resolve, reject) => {
             try {
@@ -64,18 +71,17 @@ module.exports = function (files) {
     }
     function brwsrfy(file) {
         return new Promise((resolve, reject) => {
-            const importMatch = /^(?:\s*)?import\b|\brequire\(/gm;
-            if (!file.contents.match(importMatch)) { return resolve(file); }
             var s = new require('stream').Readable(),
                 path = require('path').parse(process.cwd() + '/' + file.name);
             s.push(file.contents);
             s.push(null);
             //send alterred file stream to browserify
             browserify(s, { basedir: path.dir })
-                .transform(regenerator)
+                .transform(regenerator, {global: true})
                 .transform(babelTransform, {
                     filename: file.name,
-                    presets: [esPresets]
+                    presets: [esPresets],
+                    global: true
                 })
                 .bundle(function (error, buffer) {
                     if (error) { return reject(error); }
@@ -126,11 +132,17 @@ module.exports = function (files) {
         }
 
         if (file.name.match(/\.js$/)) {
-            return regenerate(file)
-                .then(brwsrfy)
-                .then(babelify)
-                .then(uglify)
-                .catch(formatError);
+            if (file.contents.match(/module.exports/)) return file;
+            let transpile;
+            if (file.hasImports) {
+                transpile = brwsrfy(file);
+            } else {
+                transpile = regenerate(file).then(babelify);
+            }
+            return transpile.then(replaceNodeEnvVars)
+                            .then(uglify)
+                            .catch(formatError);
+
         } else if (file.name.match(/\.(json|ld\+json)$/)) {
             return minifyJSON(file, formatError);
         } else {

@@ -24,6 +24,7 @@ module.exports = function (index, buildDir) {
     function onError(e) {
         log.error('[%s] %s', e.filename, e.message);
         if (Object.keys(e).length) { log.error(e); }
+        process.exit(1);
     }
 
     function onFilesCached() {

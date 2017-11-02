@@ -15,6 +15,7 @@ module.exports = function (file, emitter) {
     if (file.type === 'html') {
         file.contents = html.setContent(file.contents, file); }
     if (file.type === 'css') { file.contents = css.setContent(file.contents); }
+    if (file.type === 'js')  { file.contents = js.setContent(file.contents, file); }
 
     function onURL(href, expand) {
         // Remove expansion flag
