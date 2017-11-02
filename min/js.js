@@ -38,12 +38,12 @@ module.exports = function (files) {
       if (!file.sourceMap) return file;
       const map = file.sourceMap = JSON.parse(file.sourceMap),
             base = file.parentHref || file.name;
+
       map.sources = map.sources.map((source) => {
         if (source === '_stream_0.js') return base;
         if (source.match('node_modules')) return source.split(/(?=node_modules)/)[1];
         if (file.hasImports) return path.join(path.dirname(base), source);
-        if (file.inline) return file.parentHref;
-        return source;
+        return base;
       });
       return file;
     }
