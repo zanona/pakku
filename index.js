@@ -75,7 +75,6 @@ module.exports = function (index, buildDir) {
               return Q.resolve()
                 .thenResolve('GENERATING SOURCE MAPS…').tap(log.info)
                 .thenResolve(t.all).then(sourcemaps).then((files) => {
-                  console.log(files.map((f) => f.name));
                   t.all = t.all.concat(...files);
                   t.map = t.map.concat(...files);
                   return files;
