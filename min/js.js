@@ -8,8 +8,9 @@ module.exports = function (files) {
         browserify     = require('browserify'),
         babel          = require('babel-core'),
         babelTransform = require('babelify'),
-        esPresets      = require('babel-preset-env'),
-        uglifyjs       =  require('uglify-js'),
+        babelEnv       = require('babel-preset-env'),
+        babelStage3    = require('babel-preset-stage-3'),
+        uglifyjs       = require('uglify-js'),
         regenerator    = require('regenerator'),
         log = require('../utils').log;
 
@@ -98,7 +99,7 @@ module.exports = function (files) {
                 .transform(regenerator, {global: true})
                 .transform(babelTransform, {
                     filename: file.name,
-                    presets: [esPresets],
+                    presets: [babelEnv, babelStage3],
                     global: true
                 })
                 .bundle(function (error, buffer) {
@@ -116,7 +117,7 @@ module.exports = function (files) {
                 const transpiled = babel
                     .transform(getOffsetContent(file), {
                         filename: file.name,
-                        presets: [esPresets],
+                        presets: [babelEnv, babelStage3],
                         sourceMaps: true
                     });
                 file.sourceMap = transpiled.map;
