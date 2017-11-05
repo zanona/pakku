@@ -11,8 +11,7 @@ module.exports = function (files) {
         babelEnv       = require('babel-preset-env'),
         babelStage3    = require('babel-preset-stage-3'),
         uglifyjs       = require('uglify-js'),
-        regenerator    = require('regenerator'),
-        log = require('../utils').log;
+        log            = require('../utils').log;
 
     function getOffsetContent(file) {
       // adjust inline script contents with the line number it was located
@@ -96,7 +95,6 @@ module.exports = function (files) {
             s.push(null);
             //send alterred file stream to browserify
             browserify(s, { basedir: path.dir, debug: true })
-                .transform(regenerator, {global: true})
                 .transform(babelTransform, {
                     filename: file.name,
                     presets: [babelEnv, babelStage3],
@@ -128,16 +126,6 @@ module.exports = function (files) {
             }
         });
     }
-    function regenerate(file) {
-        return new Promise((resolve, reject) => {
-            try {
-                file.contents = regenerator.compile(file.contents).code;
-                resolve(file);
-            } catch (e) {
-                reject(e);
-            }
-        });
-    }
 
     function run(file) {
 
@@ -153,12 +141,7 @@ module.exports = function (files) {
 
         if (file.name.match(/\.js$/)) {
             if (file.contents.match(/module.exports/)) return file;
-            let transpile;
-            if (file.hasImports) {
-                transpile = brwsrfy(file);
-            } else {
-                transpile = regenerate(file).then(babelify);
-            }
+            const transpile = file.hasImports ? brwsrfy(file) : babelify(file);
             return transpile.then(replaceNodeEnvVars)
                             .then(uglify)
                             .then(rerouteSourceMap)
