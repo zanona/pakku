@@ -1,42 +1,35 @@
-var url  = require('url'),
-    path = require('path'),
-    ft   = require('./filetype');
+const url  = require('url'),
+      path = require('path'),
+      ft   = require('./filetype');
 
-module.exports = function (href, parentSrc) {
-    href      = (href || './').toString();
-    parentSrc = (parentSrc || './').toString();
+/**
+ * Resolve path for file
+ * @param {string} [href=./] - current file path
+ * @param {string} [parentSrc=./] - parent file path
+ * @returns {object} location
+*/
+function main(href = './', parentSrc = './') {
 
-    var dir       = process.cwd(),
-        parentDir = path.dirname(parentSrc),
-        uri,
-        file;
+  const parentDir = path.dirname(parentSrc);
+  let adjustedHref = href;
 
-    /* IF PATH IS / ASSUME HTML AND FALLBACK TO INDEX FILE */
-    if (href === '/') { href = '/index.html'; }
-    /* IF PATH STARTS WITH / PREPEND PROCESS.CWD */
-    if (href.match(/^\/\w/)) {
-        href = dir + href;
-        href = path.relative(parentDir, href);
-    }
+  /* if path is / assume html and fallback to index file */
+  if (adjustedHref === '/') adjustedHref = '/index.html';
 
-    uri = url.resolveObject(parentSrc, href),
-    file = {
-        name: uri.pathname,
-        external: !!(uri.slashes || uri.protocol),
-        type: ft(href),
-        //ext: path.parse(uri.pathname).ext,
-        href: href, //uri.href is not the original (path resolved),
-        query: (uri.search || '') + (uri.hash || '')
-        //path: path.resolve(uri.pathname)
-    };
-    return file;
-    /* {
-        name: 'index.html',
-        external: false,
-        type: 'html',
-        href: 'index.html?q=1#test,
-        query: '?q=1#test',
-        path: '/Users/name/Desktop/lib/test/index.html'
-    }*/
-    //external: /^[\w\-]+:|^\/{2}|^[^\.\w]/.test(href)
-};
+  /* if path starts with / prepend process.cwd */
+  if (adjustedHref.match(/^\/\w/)) {
+    adjustedHref = process.cwd() + adjustedHref;
+    adjustedHref = path.relative(parentDir, adjustedHref);
+  }
+
+  const resolvedPath = url.resolveObject(parentSrc, adjustedHref); //eslint-disable-line one-var
+  return {
+    name:     resolvedPath.pathname,
+    external: !!(resolvedPath.slashes || resolvedPath.protocol),
+    type:     ft(adjustedHref),
+    href:     adjustedHref,
+    query:    (resolvedPath.search || '') + (resolvedPath.hash || '')
+  };
+}
+
+module.exports = main;
