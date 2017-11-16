@@ -1,3 +1,6 @@
+const path    = require('path'),
+      resolve = require('../utils/resolve');
+
 exports.setContent = function (content, file) {
   /*
    * replace require or import statements module names ending with
@@ -14,7 +17,8 @@ exports.setContent = function (content, file) {
                 .replace(importMatch,  'import$1$2$3$2');
 };
 exports.setResource = function (file, parent) {
-    var resolve = require('../utils/resolve');
-    if (!parent.name.match(/-html-/)) { file = resolve(file.href, './'); }
-    return file;
+  if (path.extname(parent.parentHref || '') !== '.html') {
+    file = resolve(file.href);
+  }
+  return file;
 };

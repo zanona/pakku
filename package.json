@@ -41,7 +41,7 @@
     "postcss": "^6.0.14",
     "postcss-flexbugs-fixes": "^3.2.0",
     "q": "^1.5.1",
-    "uglify-js": "^3.1.8"
+    "uglify-js": "^3.1.9"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -62,5 +62,8 @@
       "type": "MIT",
       "url": "https://github.com/zanona/pakku/blob/master/LICENSE"
     }
-  ]
+  ],
+  "devDependencies": {
+    "mocha": "^4.0.1"
+  }
 }
