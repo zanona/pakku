@@ -1,0 +1,9 @@
+---
+engines:
+  duplication: { enabled: true, config: { languages: [javascript] }}
+  eslint:      { enabled: true, config: { extensions: ['.js'] }}
+  fixme:       { enabled: true }
+ratings:
+  paths: ['**.js']
+exclude_paths:
+  - '**.lock'
