@@ -30,23 +30,9 @@ function renameLinkedFiles(files) {
   log.info('RENAMING LINKS IN FILES');
   return replace(files).then(() => files);
 }
-function processCSS(files) {
-  log.info('BEAUTIFYING YOUR STYLES…');
-  return getFilesByType(files, 'css')
-    .then(min.css)
-    .then(() => files);
-}
-function processJS(files) {
-  log.info('CRANKING YOUR SCRIPTS…');
-  return getFilesByType(files, 'js')
-    .then(min.js)
-    .then(() => files);
-}
-function processHTML(files) {
-  log.info('BOOKING YOUR PAGES…');
-  return getFilesByType(files, 'html')
-      .then(min.html)
-      .then(() => files);
+function transpileFiles(type, message, files) {
+  log.info(message);
+  return getFilesByType(files, type).then(min[type]).then(() => files);
 }
 function processSourceMaps(files) {
   if (!checkOption('sourcemaps')) return Promise.resolve(files);
@@ -67,20 +53,6 @@ function buildFiles(buildDir, files) {
   log.info('STORING YOUR GOODIES…');
   return build(buildDir, files.filter((f) => !f.inline && !f.skip))
     .then(() => files);
-}
-
-function processFiles() {
-  return getFilesArray(cache)
-    .then(versionFiles)
-    .then(renameLinkedFiles)
-    .then(processCSS)
-    .then(processJS)
-    .then(processHTML)
-    .then(processSourceMaps)
-    .then(processImages)
-    .then(buildFiles)
-    .then(() => log.success('MAGIC FINISHED'))
-    .catch(onError);
 }
 
 function checkQueue(file) {
@@ -111,6 +83,19 @@ function onFileError(e, file) {
   log.warn(`[${file.name}] ${e.message}, skipping…`);
   if (checkQueue(file)) onFileComplete();
 }
+function onParserDone() {
+  return getFilesArray(cache)
+    .then(versionFiles)
+    .then(renameLinkedFiles)
+    .then(transpileFiles.bind(this, 'css',  'BEAUTIFYING YOUR STYLES…'))
+    .then(transpileFiles.bind(this, 'js',   'CRANKING YOUR SCRIPTS…'))
+    .then(transpileFiles.bind(this, 'html', 'BOOKING YOUR PAGES'))
+    .then(processSourceMaps)
+    .then(processImages)
+    .then(buildFiles)
+    .then(() => log.success('MAGIC FINISHED'))
+    .catch(onError);
+}
 
 module.exports = function (index, buildDir, options = {}) {
   // move cwd to index location
@@ -123,6 +108,6 @@ module.exports = function (index, buildDir, options = {}) {
   parser.on('resource', onResourceFound)
         .on('ready',    onFileComplete)
         .on('error',    onFileError)
-        .on('end',      processFiles)
+        .on('end',      onParserDone)
         .parse(resolve(index));
 };
