@@ -80,7 +80,9 @@ function onFileComplete() {
   }
 }
 function onFileError(e, file) {
-  log.warn(`[${file.name}] ${e.message}, skipping…`);
+  e.filename = file.name;
+  const at = e.stack.split('\n')[1].trim();
+  log.warn(`[${file.name}] ${e.message} ${at}, skipping…`);
   if (checkQueue(file)) onFileComplete();
 }
 function onParserDone() {
