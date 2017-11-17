@@ -1,0 +1,81 @@
+globals:
+  WebComponent: false
+parser: babel-eslint
+plugins: [ html ]
+extends: []
+parserOptions:
+  ecmaVersion: 6
+  sourceType: module
+  ecmaFeatures: { jsx: true }
+env:
+  es6: true
+  node: true
+  browser: true
+rules:
+# ERROR PREVENTION
+  no-cond-assign: 1 # prevent while (a = x) {
+  no-extra-semi: 1 # prevent ;;
+  comma-dangle: 2 # prevent {a: 1, b: 2, }
+  no-func-assign: 1
+  no-invalid-regexp: 1
+  no-irregular-whitespace: 1
+  no-regex-spaces: 1 # prevent multiple spaces in regex
+  no-sparse-arrays: 1 # prevent [,2,3,,1,]
+  no-unexpected-multiline: 1
+  no-unreachable: 1 # prevent declarations after return;
+  valid-typeof: 2 # compare typeof against valid type strings
+  no-dupe-keys: 2 # prevent dupe object keys
+  no-dupe-args: 2 # prevent dupe fn args
+# VARIABLES
+  no-undef: 2      # prevent undefined vars
+  no-undefined: 2  # prevent var undefined = x;
+  no-shadow: 2     # prevent var a =1; function () { var a...}
+  no-undef-init: 1 # prevent var a = undefined;
+  no-unused-vars:
+    - 1
+    - args: after-used # allow (err, resp) if resp is used
+      argsIgnorePattern: ^_ # allow skippling _ or _name
+  no-use-before-define: 0
+  no-delete-var: 1 # prevent deletion of vars
+  no-catch-shadow: 1 # prevent renaming catch err
+  no-shadow-restricted-names: 2 #prevent reserved names
+# ES6
+  arrow-parens:    [1] # remind of parens in arrow fn (() => x )
+  no-const-assign: [2] # prevent const re-assignment
+  prefer-const:    [1] # warns about `let` not re-assigned
+# BEST PRACTICES
+  complexity: [2, 6]
+  eqeqeq:  1 # === and !==
+  no-redeclare: 1
+  no-inner-declarations: [1, both]
+# STYLE
+  require-jsdoc: 0
+  valid-jsdoc: 1
+  one-var: 1 # enforce single var declaration
+  semi:    1 # enforce semi-colon ;
+  indent:
+    - 1
+    - 2
+    - SwitchCase: 1
+      VariableDeclarator:
+        var: 2
+        let: 2
+        const: 3
+  quotes: [1, single, avoid-escape]
+  camelcase: 0
+  key-spacing: 0
+  consistent-return: 0
+  no-mixed-requires: 0
+  no-multi-spaces: 0
+  no-empty: 1
+  no-plusplus: 1 # prevent -- or ++
+  no-mixed-spaces-and-tabs: 1
+  no-trailing-spaces: 1
+  no-unneeded-ternary: 1
+  no-whitespace-before-property: 2
+  no-multiple-empty-lines: [1, max: 1]
+  no-negated-condition: 1
+  max-depth: [1, 3]
+  max-statements: [1, 30]
+  comma-style: [1, last]
+  yoda: [1, never]
