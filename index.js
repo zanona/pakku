@@ -1,14 +1,14 @@
-const cache      = {},
-      queue      = [],
-      path       = require('path'),
-      log        = require('./utils').log,
-      resolve    = require('./utils').resolve,
-      min        = require('./min'),
-      version    = require('./lib/version'),
-      replace    = require('./lib/replacer'),
-      parser     = require('./parser')(),
-      sourcemaps = require('./lib/sourcemaps'),
-      build      = require('./lib/build');
+const cache       = {},
+      queue       = [],
+      path        = require('path'),
+      log         = require('./utils').log,
+      resolve     = require('./utils').resolve,
+      min         = require('./min'),
+      vname       = require('./lib/vname'),
+      urlRewriter = require('./lib/url-rewriter'),
+      parser      = require('./parser')(),
+      sourcemaps  = require('./lib/sourcemaps'),
+      build       = require('./lib/build');
 
 function checkOption(options, opt) {
   opt = options[opt];
@@ -21,14 +21,13 @@ function getFilesArray(cachedFiles) {
 function getFilesByType(files, type) {
   return Promise.resolve(files.filter((f) => f.type === type));
 }
-function versionFiles(files) {
-  if (checkOption('skip-versioning')) return Promise.resolve(files);
-  log.info('VERSIONING FILES');
-  return version(files).then(() => files);
+function renameFiles(files) {
+  log.info('RENAMING FILES');
+  return vname(files).then(() => files);
 }
-function renameLinkedFiles(files) {
-  log.info('RENAMING LINKS IN FILES');
-  return replace(files).then(() => files);
+function rewriteURLsInFiles(files) {
+  log.info('REWRITING LINKS IN FILES');
+  return urlRewriter(files).then(() => files);
 }
 function transpileFiles(type, message, files) {
   log.info(message);
@@ -87,8 +86,8 @@ function onFileError(e, file) {
 }
 function onParserDone() {
   return getFilesArray(cache)
-    .then(versionFiles)
-    .then(renameLinkedFiles)
+    .then(renameFiles)
+    .then(rewriteURLsInFiles)
     .then(transpileFiles.bind(this, 'css',  'BEAUTIFYING YOUR STYLES…'))
     .then(transpileFiles.bind(this, 'js',   'CRANKING YOUR SCRIPTS…'))
     .then(transpileFiles.bind(this, 'html', 'BOOKING YOUR PAGES'))
