@@ -1,5 +1,6 @@
 const url      = require('url'),
       path     = require('path'),
+      platform = require('os').platform(),
       filetype = require('./filetype');
 
 /**
@@ -26,6 +27,9 @@ function main(src = '', parentSrc = '') {
   }
 
   src = path.normalize(src);
+
+  // normalize windows paths to unix-style
+  if (platform === 'win32') src = src.replace(/\\/g, '/');
 
   const r = {
     name:     src,
