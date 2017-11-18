@@ -31,6 +31,53 @@ function stripCommentsExceptSSI(str) {
   return str.replace(/<!--(?!#include)[\s\S]*?-->/gmi, '');
 }
 
+function getTextIndexLineNumber(content, index) {
+  const head = content.substr(0, index).match(/\n/g);
+  if (head) return head.length + 1;  //non-zero based count
+  return 1;
+}
+function removeInlineAttrs(attrs) {
+  delete attrs.src;
+  delete attrs.href;
+  delete attrs['data-inline'];
+}
+function appendFileSource(file, src) {
+  file.includes = file.includes || [];
+  file.includes.push(src);
+}
+function createImportTag(tag, src, attrs) {
+  const nodeName = tag === 'link' ? 'style' : 'script';
+  return `<${nodeName} ${attrs}>@${src}</${nodeName}>`;
+}
+
+/**
+  * This method is deprecated and will be removed
+  * in favour of browserified modules
+  * @param {string} tag tag name
+  * @param {string} src script source
+  * @param {object} attrs tag html attributes
+  * @returns {string} a script tag
+**/
+function createAMDImportTag(tag, src, attrs) {
+  attrs.src = `__amd_${attrs['data-main']}`;
+  if (!path.extname(attrs.src)) attrs.src += '.js';
+  delete attrs['data-main'];
+  return `<script ${attrs}></script>`;
+}
+
+function getNameForInlineResource(tag, filename, fileType, line, column) {
+  const name = path.basename(filename).replace(path.extname(filename), ''),
+        ext  = fileType || (tag === 'style' ? 'css' : 'js');
+  return `${name}-${tag}-${line}_${column}.${ext}`;
+}
+function registerTagContentsAsFile(name, content, line, column) {
+  tmpFiles[name] = content;
+  tmpFiles[`${name}_meta`] = { line, column };
+}
+function createInlineTag(tag, src, attrs) {
+  return `<${tag} ${attrs}>@${src}</${tag}>`;
+}
+
 function parse(match, tag, attrs, textContent, index, content) {
 
   attrs = getAttrs(attrs);
@@ -39,12 +86,10 @@ function parse(match, tag, attrs, textContent, index, content) {
 
   const file   = this,
         src    = attrs.src || attrs.href,
-        line   = (content.substr(0, index).match(/\n/g) || []).length + 1, //non-zero based count
-        column = match.indexOf(textContent) + 1, //non-zero based count
-        inline = src && attrs['data-inline'],
-        meta   = {};
+        inline = src && attrs['data-inline'];
 
-  let fileType, tmpFilename;
+  let node = match,
+      fileType;
 
   if (attrs.type) {
     // parse type attribute such type=text/less
@@ -59,40 +104,29 @@ function parse(match, tag, attrs, textContent, index, content) {
   }
 
   if (inline) {
-    delete attrs.src;
-    delete attrs.href;
-    delete attrs['data-inline'];
-    file.includes = file.includes || [];
-    file.includes.push(src);
+    removeInlineAttrs(attrs);
+    appendFileSource(file, src);
   }
 
   attrs = flattenAttrs(attrs);
 
   if (tag.match(/style|script/) && textContent) {
-    const name = path.basename(file.name).replace(path.extname(file.name), ''),
-          ext = fileType || (tag === 'style' ? 'css' : 'js');
-    tmpFilename = `${name}-${tag}-${line}_${column}.${ext}`;
-    tmpFiles[tmpFilename] = textContent;
-    meta.line = line;
-    meta.column = column;
-    tmpFiles[`${tmpFilename}_meta`] = meta;
-    return `<${tag} ${attrs}>@${tmpFilename}</${tag}>`;
+    const line   = getTextIndexLineNumber(content, index),
+          column = match.indexOf(textContent) + 1, //non-zero based count
+          name   = getNameForInlineResource(tag, file.name, fileType, line, column);
+    registerTagContentsAsFile(name, textContent, line, column);
+    node = createInlineTag(tag, name, attrs);
   }
 
   if (tag.match(/link|script/) && inline) {
-    const nodeName = tag === 'link' ? 'style' : 'script';
-    return `<${nodeName} ${attrs}>@${src}</${nodeName}>`;
+    node = createImportTag(tag, src, attrs);
   }
 
-  /* AMD require.js support */
   if (tag === 'script' && attrs['data-main']) {
-    attrs.src = `__amd_${attrs['data-main']}`;
-    if (!path.extname(attrs.src)) attrs.src += '.js';
-    delete attrs['data-main'];
-    return `<script ${attrs}></script>`;
+    node = createAMDImportTag(tag, src, attrs);
   }
 
-  return match;
+  return node;
 }
 
 function parseSSI(m, filePath) {
