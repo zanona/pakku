@@ -1,0 +1,13 @@
+---
+sudo: false
+language: node_js
+node_js: [6, 8]
+cache: yarn
+before_install:
+  - CC=https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  - curl -L $CC > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+after_script:
+  - nyc report --reporter lcov
+  - cat coverage/lcov.info | coveralls
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
