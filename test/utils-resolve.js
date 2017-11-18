@@ -1,25 +1,22 @@
-/*global describe, it*/
-const assert  = require('assert'),
+const {test}  = require('ava'),
       resolve = require('../utils/resolve');
 
 let path;
 
-describe('utils/resolve', () => {
-  it('should define remote URLs as external', () => {
-    assert.ok(resolve('//data/products.json').external);
-    assert.ok(resolve('http://data/products.json').external);
-  });
-  it('should define email links as external', () => {
-    assert.ok(resolve('mailto:email@example.com').external);
-  });
-  it('should normalize absolute paths', () => {
-    path = resolve('/data/products.json', 'lib/products/index.html');
-    assert.strictEqual(path.href, 'data/products.json');
-  });
-  it('should normalize relative paths', () => {
-    path = resolve('icons.woff', 'lib/fonts/index.less');
-    assert.strictEqual(path.href, 'lib/fonts/icons.woff');
-    path = resolve('lib/utils.less', 'lib/similar/index.less');
-    assert.strictEqual(path.href, 'lib/utils.less');
-  });
+test('should define remote URLs as external', (t) => {
+  t.true(resolve('//data/products.json').external);
+  t.true(resolve('http://data/products.json').external);
+});
+test('should define email links as external', (t) => {
+  t.true(resolve('mailto:email@example.com').external);
+});
+test('should normalize absolute paths', (t) => {
+  path = resolve('/data/products.json', 'lib/products/index.html');
+  t.is(path.name, 'data/products.json');
+});
+test('should stack relative paths', (t) => {
+  path = resolve('icons.woff', 'lib/fonts/index.less');
+  t.is(path.name, 'lib/fonts/icons.woff');
+  path = resolve('lib/utils.less', 'lib/similar/index.less');
+  t.is(path.name, 'lib/similar/lib/utils.less');
 });
