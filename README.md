@@ -1,5 +1,13 @@
 Pakku | パック
 ===
+[![Maintainability](https://api.codeclimate.com/v1/badges/ec254fc1d05ea5429333/maintainability)](https://codeclimate.com/github/zanona/pakku/maintainability)
+[![Coverage Status](https://coveralls.io/repos/github/zanona/pakku/badge.svg?branch=master)](https://coveralls.io/github/zanona/pakku?branch=master)
+[![Travis CI](https://travis-ci.org/zanona/pakku.svg?branch=master)](https://travis-ci.org/zanona/pakku)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/8fk1gpv6dpyypoho/branch/master?svg=true)](https://ci.appveyor.com/project/zanona/pakku/branch/master)
+[![Dependency Status](https://dependencyci.com/github/zanona/pakku/badge)](https://dependencyci.com/github/zanona/pakku)
+[![NPM Version](https://img.shields.io/npm/v/pakku.svg)](https://npmjs.com/package/pakku)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+
 
 A Command-line application for packing web sites and applications into a directory full of goodness and performance improvements.
 
