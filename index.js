@@ -26,6 +26,7 @@ function renameFiles(files) {
   return vname(files).then(() => files);
 }
 function rewriteLinksInFiles(allFiles, files) {
+  if (!files.length) return files;
   const type = files[0].type.toUpperCase();
   log.info(`REWRITING LINKS IN ${type} FILES`);
   return linkRewriter(files, allFiles).then(() => files);
