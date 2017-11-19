@@ -1,0 +1,21 @@
+---
+environment:
+  matrix:
+    - nodejs_version: '6'
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - npm -g install yarn
+  - yarn install
+  - node --version
+  - npm --version
+  - yarn --version
+matrix:
+  fast_finish: true
+build: 'off'
+version: '{build}'
+test_script:
+  - yarn test
+after_test:
+  - .\node_modules\.bin\nyc report --reporter lcov
+  - type .\coverage\lcov.info | .\node_modules\.bin\coveralls
+  - .\node_modules\.bin\codecov
