@@ -32,9 +32,9 @@ exports.setContent = function (content, file) {
 exports.setResource = function (file) {
   file = JSON.parse(JSON.stringify(file));
 
-  if (file.href.match(/^__base_/)) {
-    file.href = file.href.replace(/^__base_/, '');
-    file = resolve(file.href);
+  if (file.name.match(/^__base_/)) {
+    file.name = file.name.replace(/^__base_/, '');
+    file = resolve(file.name);
   }
   // Skip all css import resources.
   // CSS files are supposed to be merged into the main file

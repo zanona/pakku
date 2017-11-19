@@ -108,7 +108,7 @@ exports.setContent = function (content, file) {
   tmpFiles = {};
 
   // if markdown, convert to html
-  if (path.extname(file.href) === '.md') content = marked(content);
+  if (path.extname(file.name) === '.md') content = marked(content);
 
   return stripCommentsExceptSSI(content)
          .replace(validTags, parse.bind(file))
@@ -117,7 +117,7 @@ exports.setContent = function (content, file) {
 
 exports.setResource = function (file, parent) {
   file = JSON.parse(JSON.stringify(file));
-  const basename = path.basename(file.href);
+  const basename = path.basename(file.name);
   if (tmpFiles[basename]) {
     file.contents   = tmpFiles[basename];
     file.parentHref = parent.name;

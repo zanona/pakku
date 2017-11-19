@@ -18,7 +18,7 @@ exports.setContent = function (content, file) {
 };
 exports.setResource = function (file, parent) {
   if (path.extname(parent.parentHref || '') !== '.html') {
-    file = resolve(file.href);
+    file = resolve(file.name);
   }
   return file;
 };

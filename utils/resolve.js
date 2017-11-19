@@ -16,7 +16,7 @@ function isRemote(src) { return /^(?:\w+:|\/\/)/.test(src); }
  * @returns {object} location
 */
 function main(src = '', parentSrc = '') {
-  if (isRemote(src)) return { href: src, external: true };
+  if (isRemote(src)) return { name: src, external: true };
 
   if (!path.extname(src)) src += '/index.html';
   if (path.isAbsolute(src)) {
@@ -29,7 +29,6 @@ function main(src = '', parentSrc = '') {
 
   const r = {
     name:     src,
-    href:     src,
     type:     filetype(src),
     ext:      path.extname(src).replace('.', '')
   };

@@ -22,7 +22,7 @@ function onURL(href, expand) {
         parentSrc  = file.ext === 'js' ? '' : file.name;
   let found = resolve(sanitizeSrc(href), parentSrc);
 
-  if (found.external) return found.href;
+  if (found.external) return found.name;
   if (fileParser) found = fileParser.setResource(found, file);
   if (expand) found.inline = true;
 
