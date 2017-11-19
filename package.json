@@ -1,6 +1,6 @@
 {
   "name": "pakku",
-  "version": "1.3.2",
+  "version": "1.4.0-rc1.0",
   "description": "Module and CLI for packing web application",
   "keywords": [
     "web",
