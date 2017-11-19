@@ -1,35 +1,39 @@
-const url  = require('url'),
-      path = require('path'),
-      ft   = require('./filetype');
+const url      = require('url'),
+      path     = require('path'),
+      filetype = require('./filetype');
+
+/**
+ * Check if src is from remote file (i.e: an URL)
+ * @param {string} src - The src attribute of a file
+ * @returns {boolean} isRemote
+*/
+function isRemote(src) { return /^(?:\w+:|\/\/)/.test(src); }
 
 /**
  * Resolve path for file
- * @param {string} [href=./] - current file path
- * @param {string} [parentSrc=./] - parent file path
+ * @param {string} src - current file path
+ * @param {string} parentSrc - parent file path
  * @returns {object} location
 */
-function main(href = './', parentSrc = './') {
+function main(src = '', parentSrc = '') {
+  if (isRemote(src)) return { href: src, external: true };
 
-  const parentDir = path.dirname(parentSrc);
-  let adjustedHref = href;
-
-  /* if path is / assume html and fallback to index file */
-  if (adjustedHref === '/') adjustedHref = '/index.html';
-
-  /* if path starts with / prepend process.cwd */
-  if (adjustedHref.match(/^\/\w/)) {
-    adjustedHref = process.cwd() + adjustedHref;
-    adjustedHref = path.relative(parentDir, adjustedHref);
+  if (!path.extname(src)) src += '/index.html';
+  if (path.isAbsolute(src)) {
+    src = './' + src;
+  } else {
+    src = url.resolve(parentSrc, src);
   }
 
-  const resolvedPath = url.resolveObject(parentSrc, adjustedHref); //eslint-disable-line one-var
-  return {
-    name:     resolvedPath.pathname,
-    external: !!(resolvedPath.slashes || resolvedPath.protocol),
-    type:     ft(adjustedHref),
-    href:     adjustedHref,
-    query:    (resolvedPath.search || '') + (resolvedPath.hash || '')
+  src = path.normalize(src);
+
+  const r = {
+    name:     src,
+    href:     src,
+    type:     filetype(src),
+    ext:      path.extname(src).replace('.', '')
   };
+  return r;
 }
 
 module.exports = main;

@@ -1,30 +1,17 @@
-/*eslint indent:4*/
-module.exports = function (files) {
-    'use strict';
-    var Q = require('q'),
-        log = require('../utils').log,
-        minify = require('html-minifier').minify;
+const minify = require('html-minifier').minify,
+      log    = require('../utils').log;
 
-    function run(file) {
-        try {
-            file.contents = minify(file.contents, {
-                collapseWhitespace: true,
-                preserveLineBreaks: true,
-                removeComments: true,
-                removeAttributeQuotes: true
-            });
-        } catch (e) {
-            log.error('ERROR: Minifying HTML on', file.name);
-        }
-        return file;
-    }
-
-    function main() {
-        var d = Q.defer();
-        if (!files.map) { files = [files]; }
-        Q.all(files.map(run)).then(d.resolve, d.reject);
-        return d.promise;
-    }
-
-    return main();
-};
+function run(file) {
+  try {
+    file.contents = minify(file.contents, {
+      collapseWhitespace:    true,
+      preserveLineBreaks:    true,
+      removeComments:        true,
+      removeAttributeQuotes: true
+    });
+  } catch (e) {
+    log.warn('[%s] Error minifying HTML: %s', file.name, e.message.split('\n')[0]);
+  }
+  return file;
+}
+module.exports = (files) => Promise.all(files.map(run));
