@@ -7,9 +7,11 @@ function sanitizeFileName(src, parentName) {
   return src;
 }
 
-exports.setContent = function (content, file) {
+exports.setContent = function (file) {
   const imports       = /@import(?: url)?[ \(\'"]+(.+)\b[ \(\'";\)]+/g,
         attrSelectors = /\[(?:src|href)[*|\^?]?=(['"])?(.+?)\1?\]/g;
+
+  let content = file.contents;
 
   content = content.replace(imports, (m, href) => {
     const resolved = resolve(sanitizeFileName(href, file.name));

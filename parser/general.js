@@ -40,7 +40,7 @@ function onURL(href, expand) {
 
 module.exports = function (file, emitter) {
   const fileParser = parser[file.type];
-  if (fileParser) file.contents = fileParser.setContent(file.contents, file);
+  if (fileParser) file.contents = fileParser.setContent(file);
   file.contents = file.contents.replace(whitelist, onURL.bind({file, emitter}));
   return file;
 };

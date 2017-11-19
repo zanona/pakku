@@ -137,7 +137,8 @@ function parseSSI(m, filePath) {
   return `@${filePath}`;
 }
 
-exports.setContent = function (content, file) {
+exports.setContent = function (file) {
+  let content = file.contents;
   // need to clean cache once it persists accross instances
   tmpFiles = {};
 
