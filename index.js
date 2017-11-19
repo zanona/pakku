@@ -1,14 +1,14 @@
-const cache       = {},
-      queue       = [],
-      path        = require('path'),
-      log         = require('./utils').log,
-      resolve     = require('./utils').resolve,
-      min         = require('./min'),
-      vname       = require('./lib/vname'),
-      urlRewriter = require('./lib/url-rewriter'),
-      parser      = require('./parser')(),
-      sourcemaps  = require('./lib/sourcemaps'),
-      build       = require('./lib/build');
+const cache        = {},
+      queue        = [],
+      path         = require('path'),
+      log          = require('./utils').log,
+      resolve      = require('./utils').resolve,
+      min          = require('./min'),
+      vname        = require('./lib/vname'),
+      linkRewriter = require('./lib/link-rewriter'),
+      parser       = require('./parser')(),
+      sourcemaps   = require('./lib/sourcemaps'),
+      build        = require('./lib/build');
 
 function checkOption(options, opt) {
   opt = options[opt];
@@ -25,13 +25,17 @@ function renameFiles(files) {
   log.info('RENAMING FILES');
   return vname(files).then(() => files);
 }
-function rewriteURLsInFiles(files) {
-  log.info('REWRITING LINKS IN FILES');
-  return urlRewriter(files).then(() => files);
+function rewriteLinksInFiles(allFiles, files) {
+  const type = files[0].type.toUpperCase();
+  log.info(`REWRITING LINKS IN ${type} FILES`);
+  return linkRewriter(files, allFiles).then(() => files);
 }
-function transpileFiles(type, message, files) {
+function processFiles(type, message, files) {
   log.info(message);
-  return getFilesByType(files, type).then(min[type]).then(() => files);
+  return getFilesByType(files, type)
+    .then(rewriteLinksInFiles.bind(this, files))
+    .then(min[type])
+    .then(() => files);
 }
 function processSourceMaps(files) {
   if (!checkOption('sourcemaps')) return Promise.resolve(files);
@@ -87,10 +91,9 @@ function onFileError(e, file) {
 function onParserDone() {
   return getFilesArray(cache)
     .then(renameFiles)
-    .then(rewriteURLsInFiles)
-    .then(transpileFiles.bind(this, 'css',  'BEAUTIFYING YOUR STYLES…'))
-    .then(transpileFiles.bind(this, 'js',   'CRANKING YOUR SCRIPTS…'))
-    .then(transpileFiles.bind(this, 'html', 'BOOKING YOUR PAGES'))
+    .then(processFiles.bind(this, 'css',  'BEAUTIFYING YOUR STYLES…'))
+    .then(processFiles.bind(this, 'js',   'CRANKING YOUR SCRIPTS…'))
+    .then(processFiles.bind(this, 'html', 'BOOKING YOUR PAGES'))
     .then(processSourceMaps)
     .then(processImages)
     .then(buildFiles)
