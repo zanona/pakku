@@ -12,15 +12,12 @@ module.exports = function (files) {
         regenerator    = require('regenerator'),
         log = require('../utils').log;
 
-    function getOffsetContent(file) {
-      // adjust inline script contents with the line number it was located
-      if (!file.inline) return file.contents;
-      // using zero-base index to match with source map spec
-      const fmtLine = file.line   ? file.line   - 1 : 0,
-            fmtCol  = file.column ? file.column - 1 : 0;
-      return Array(fmtLine).fill('\n').join('')
-           + Array(fmtCol).fill(' ').join('')
-           + file.contents;
+    function replaceNodeEnvVars(file) {
+        const nodePattern = /process.env(?:\.(.+?)\b|\[(["'])(.+?)\2\])/g;
+        file.contents = file.contents.replace(nodePattern, (m,v1,_,v3) => {
+            return `'${process.env[v1 || v3] || ''}'`;
+        });
+        return Promise.resolve(file);
     }
     function minifyJSON(file) {
         return new Promise((resolve, reject) => {
@@ -39,23 +36,12 @@ module.exports = function (files) {
             output: {
               inline_script: true,
               beautify: false
-            },
-            sourceMap: {
-              content: file.sourceMap
-              /*
-               * need to set the `url` param based on cmd option
-               * such as --source-map-expose=true, which will then
-               * print //# sourceMapURL at the end of scripts
-               */
-              //,url: `sourcemaps/${file.name}.map`
             }
         };
 
         return new Promise((resolve, reject) => {
             try {
-                const minified = uglifyjs.minify(file.contents, options);
-                file.sourceMap = minified.map;
-                file.contents  = minified.code;
+                file.contents = uglifyjs.minify(file.contents, options).code;
                 resolve(file);
             } catch (e) {
                 reject(e);
@@ -83,18 +69,14 @@ module.exports = function (files) {
                 });
         });
     }
-
     function babelify(file) {
         return new Promise((resolve, reject) => {
             try {
-                const transpiled = babel
-                    .transform(getOffsetContent(file), {
+                file.contents = babel
+                    .transform(file.contents, {
                         filename: file.name,
-                        presets: [esPresets],
-                        sourceMaps: true
-                    });
-                file.sourceMap = transpiled.map;
-                file.contents  = transpiled.code;
+                        presets: [esPresets]
+                    }).code;
                 resolve(file);
             } catch (e) {
                 reject(e);
@@ -132,7 +114,9 @@ module.exports = function (files) {
             } else {
                 transpile = regenerate(file).then(babelify);
             }
-            return transpile.then(uglify).catch(formatError);
+            return transpile.then(replaceNodeEnvVars)
+                            .then(uglify)
+                            .catch(formatError);
 
         } else if (file.name.match(/\.(json|ld\+json)$/)) {
             return minifyJSON(file, formatError);
