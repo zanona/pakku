@@ -1,14 +1,9 @@
-# EditorConfig is awesome: http://EditorConfig.org
-
-# Top-most EditorConfig file
 root = true
 
-# Match and apply these rules for all file
-# types you open in your code editor
 [*]
-# Unix-style newlines
-end_of_line = lf
 indent_style = space
 indent_size = 2
+charset = utf-8
+end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
