@@ -64,6 +64,7 @@ function checkQueue(file) {
 }
 function onError(e) {
   log.error(e);
+  parser.emit('fatal', e);
   process.exit(1);
 }
 function onResourceFound(file) {

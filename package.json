@@ -46,11 +46,12 @@
     "ava": "^0.23.0",
     "codecov": "^3.0.0",
     "coveralls": "^3.0.0",
+    "mock-fs": "^4.4.2",
     "nyc": "^11.3.0",
     "tap-xunit": "^1.7.0"
   },
   "scripts": {
-    "test": "nyc ava -v"
+    "test": "nyc ava test/{unit,functional} -v"
   },
   "repository": {
     "type": "git",
