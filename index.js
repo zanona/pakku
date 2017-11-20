@@ -16,7 +16,8 @@ function checkOption(options, opt) {
   return opt;
 }
 function getFilesArray(cachedFiles) {
-  return Promise.resolve(Object.entries(cachedFiles).map((e) => e[1]));
+  const files = Object.keys(cachedFiles).map((k) => cachedFiles[k]);
+  return Promise.resolve(files);
 }
 function getFilesByType(files, type) {
   return Promise.resolve(files.filter((f) => f.type === type));
