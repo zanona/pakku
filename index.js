@@ -55,8 +55,8 @@ function processImages(files) {
 }
 function buildFiles(buildDir, files) {
   log.info('STORING YOUR GOODIES…');
-  return build(buildDir, files.filter((f) => !f.inline && !f.skip))
-    .then(() => files);
+  const validFiles = files.filter((f) => !f.inline && !f.skip);
+  return build(buildDir, validFiles).then(() => files);
 }
 
 function checkQueue(file) {
@@ -98,7 +98,10 @@ function onParserDone() {
     .then(processSourceMaps)
     .then(processImages)
     .then(buildFiles)
-    .then(() => log.success('MAGIC FINISHED'))
+    .then((files) => {
+      log.success('MAGIC FINISHED');
+      parser.emit('after_build', files);
+    })
     .catch(onError);
 }
 
@@ -110,9 +113,10 @@ module.exports = function (index, buildDir, options = {}) {
   checkOption = checkOption.bind(this, options); //eslint-disable-line no-func-assign
   buildFiles  = buildFiles.bind(this, buildDir); //eslint-disable-line no-func-assign
 
-  parser.on('resource', onResourceFound)
-        .on('ready',    onFileComplete)
-        .on('error',    onFileError)
-        .on('end',      onParserDone)
-        .parse(resolve(index));
+  return parser
+          .on('resource', onResourceFound)
+          .on('ready',    onFileComplete)
+          .on('error',    onFileError)
+          .on('end',      onParserDone)
+          .parse(resolve(index));
 };

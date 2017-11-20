@@ -20,12 +20,13 @@ function routeFile(file) {
 }
 
 function parse(file) {
-  return getFileContents(file)
+  getFileContents(file)
       .then(() => routeFile.call(this, file))
       .then(() => file.done = true)
       .then(() => this.emit('resource', file))
       .then(() => this.emit('ready'))
     .catch((e) => this.emit('error', e, file));
+  return this;
 }
 
 module.exports = function () {
