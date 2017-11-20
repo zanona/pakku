@@ -44,10 +44,11 @@ module.exports = {
   info()    { init('info',  'cyan',   arguments); },
   success() { init('log',   'green',  arguments); },
   warn()    { init('warn',  'yellow', arguments); },
-  error(err)  {
+  error(err = {})  {
     err.fileName = err.fileName || this.name;
-    err.message  = err.message.split('\n')[0] || err.extract;
-    const at     = err.stack.split('\n')[1].trim();
-    init('error', 'red', [`[${err.fileName}] ${err.message} ${at}`]);
+    if (err.message) err.message = err.message.split('\n')[0];
+    if (!err.message) err.message = err.extract;
+    if (err.stack) err.stack = err.stack.split('\n')[1].trim();
+    init('error', 'red', [`[${err.fileName}] ${err.message} ${err.stack}`]);
   }
 };
