@@ -43,7 +43,7 @@
     "uglify-js": "^3.1.10"
   },
   "devDependencies": {
-    "ava": "^0.23.0",
+    "ava": "^0.24.0",
     "codecov": "^3.0.0",
     "coveralls": "^3.0.0",
     "mock-fs": "^4.4.2",
