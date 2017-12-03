@@ -9,6 +9,4 @@ before_install:
   - chmod +x ./cc-test-reporter
 after_script:
   - nyc report --reporter lcov
-  - cat coverage/lcov.info | coveralls
-  - codecov
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

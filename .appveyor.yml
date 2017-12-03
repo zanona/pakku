@@ -18,7 +18,3 @@ version: '{build}'
 max_jobs: 3
 test_script:
   - yarn test
-after_test:
-  - .\node_modules\.bin\nyc report --reporter lcov
-  - type .\coverage\lcov.info | .\node_modules\.bin\coveralls
-  - .\node_modules\.bin\codecov
