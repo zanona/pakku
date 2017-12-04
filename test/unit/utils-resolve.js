@@ -1,5 +1,5 @@
 const {test}  = require('ava'),
-      resolve = require('../../utils/resolve');
+      resolve = require('../../lib/utils/resolve');
 
 let path;
 
