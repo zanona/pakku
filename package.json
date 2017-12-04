@@ -30,6 +30,7 @@
     "batch-promises": "^0.0.3",
     "browserify": "^14.5.0",
     "clean-css": "^4.1.9",
+    "common-shakeify": "^0.4.5",
     "filendir": "^1.0.0",
     "html-minifier": "^3.5.7",
     "imagemin": "^5.3.1",
