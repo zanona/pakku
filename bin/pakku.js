@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 const options = parseOptions(process.argv.splice(2)),
-      log  = require('./utils/log'),
-      pkg  = require('./package'),
-      run  = require('./');
+      log  = require('../lib/utils/log'),
+      pkg  = require('../package'),
+      run  = require('../lib');
 
 function parseOptions(args) {
   return args.reduce((opts, opt) => {

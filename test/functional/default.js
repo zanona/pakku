@@ -2,7 +2,7 @@ const {test} = require('ava'),
       mockFsHelper = require('../mock-fs-helper.js'),
       nodeModules  = mockFsHelper.duplicateFSInMemory('node_modules'),
       mock   = require('mock-fs'),
-      pakku  = require('../../'),
+      pakku  = require('../../lib'),
       files  = {
         node_modules: nodeModules,
         'index.html': `
