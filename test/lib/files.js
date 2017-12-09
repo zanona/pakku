@@ -20,9 +20,14 @@ exports.generateFiles = (baseDir) => {
       const msg = 'hello world';
       console.log(\`\${msg}\`);
     `,
+    'lib/meta/picture.svg': `
+      <svg viewBox='0 0 100 100' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+        <circle fill='#000000' cx='50' cy='50' r='50'></circle>
+      </svg>
+    `,
     'lib/meta/index.less': `
       @color: red;
-      body{ background: @color; }
+      body{ background: @color url(picture.svg); }
     `
   };
   return rebasePathForFiles(files, baseDir);
