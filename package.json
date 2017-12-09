@@ -49,6 +49,7 @@
     "tap-xunit": "^1.7.0"
   },
   "scripts": {
+    "test:local": "ava test/{unit,functional} -v",
     "test": "nyc ava test/{unit,functional} -v"
   },
   "repository": {

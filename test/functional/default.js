@@ -1,38 +1,34 @@
 const {test} = require('ava'),
-      mockFsHelper = require('../mock-fs-helper.js'),
-      nodeModules  = mockFsHelper.duplicateFSInMemory('node_modules'),
+      fs     = require('fs'),
       mock   = require('mock-fs'),
       pakku  = require('../../lib'),
-      files  = {
-        node_modules: nodeModules,
-        'index.html': `
-          <link rel=stylesheet href=lib/meta/index.less>
-          <script src=lib/meta/index.js></script>
-        `,
-        'lib/meta/index.js': `
-          const msg = 'hello world';
-          console.log(\`\${msg}\`);
-        `,
-        'lib/meta/index.less': `
-          @color: red;
-          body{ background: @color; }
-        `
-      };
+      files  = require('../lib/files'),
+      TARGET_FILE = 'index.html',
+      BUILD_DIR = 'build';
+
+let cache;
 
 test.before('setting up fs', mock.bind(this, files));
-
-test.cb('check for built files', (t) => {
-  pakku('index.html', 'build', {sourcemaps: true})
-    .on('after_build', (cache) => {
-      console.log(cache.map((f) => f.name));
-      const file = cache.find((f) => f.name === 'index.html');
-      t.true(file.done);
-      t.end();
-    })
+test.cb.before('running pakku', (t) => {
+  pakku(TARGET_FILE, BUILD_DIR, {sourcemaps: true})
+    .on('after_build', (c) => (cache = c, t.end()))
     .on('fatal', t.end);
 });
+test.beforeEach((t) => t.context.cache = cache);
 
-test.after('cleaning up fs', () => {
-  console.log('cleaning up');
-  mock.restore();
+test.cb('check for target build directory', (t) => fs.stat(BUILD_DIR, t.end));
+
+test('check file structure', (t) => {
+  const cachedFiles = Object.values(t.context.cache);
+  t.plan(cachedFiles.length);
+  cachedFiles.forEach(({vname}) => {
+    t.notThrows(fs.statSync.bind(this, `${BUILD_DIR}/${vname}`));
+  });
 });
+
+test('check for built files', (t) => {
+  const file = t.context.cache.find((f) => f.name === 'index.html');
+  return t.true(file.done);
+});
+
+test.after('cleaning up fs', mock.restore);
