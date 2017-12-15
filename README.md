@@ -7,6 +7,7 @@ Pakku | パック
 [![Dependency Status](https://dependencyci.com/github/zanona/pakku/badge)](https://dependencyci.com/github/zanona/pakku)
 [![NPM Version](https://img.shields.io/npm/v/pakku.svg)](https://npmjs.com/package/pakku)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 
 A Command-line application for packing web sites and applications into a directory full of goodness and performance improvements.

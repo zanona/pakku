@@ -1,13 +1,13 @@
-const path = require('path'),
-      fileCacher = require('./file-cacher.js'),
-      nodeModules  = fileCacher.duplicateFSInMemory('node_modules');
-function rebasePathForFiles(files, baseDir) {
+const path = require('path')
+const fileCacher = require('./file-cacher.js')
+const nodeModules = fileCacher.duplicateFSInMemory('node_modules')
+function rebasePathForFiles (files, baseDir) {
   return Object.keys(files).reduce((p, c) => {
-    const f = files[c];
-    if (baseDir && c !== 'node_modules') c = path.join(baseDir, c);
-    p[c] = f;
-    return p;
-  }, {});
+    const f = files[c]
+    if (baseDir && c !== 'node_modules') c = path.join(baseDir, c)
+    p[c] = f
+    return p
+  }, {})
 }
 exports.generateFiles = (baseDir) => {
   const files = {
@@ -29,6 +29,6 @@ exports.generateFiles = (baseDir) => {
       @color: red;
       body{ background: @color url(picture.svg); }
     `
-  };
-  return rebasePathForFiles(files, baseDir);
-};
+  }
+  return rebasePathForFiles(files, baseDir)
+}
