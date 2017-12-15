@@ -1,13 +1,12 @@
 Pakku | パック
 ===
-[![Maintainability](https://api.codeclimate.com/v1/badges/ec254fc1d05ea5429333/maintainability)](https://codeclimate.com/github/zanona/pakku/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/ec254fc1d05ea5429333/test_coverage)](https://codeclimate.com/github/zanona/pakku/test_coverage)
-[![Travis CI](https://travis-ci.org/zanona/pakku.svg?branch=master)](https://travis-ci.org/zanona/pakku)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/8fk1gpv6dpyypoho/branch/master?svg=true)](https://ci.appveyor.com/project/zanona/pakku/branch/master)
-[![Dependency Status](https://dependencyci.com/github/zanona/pakku/badge)](https://dependencyci.com/github/zanona/pakku)
-[![NPM Version](https://img.shields.io/npm/v/pakku.svg)](https://npmjs.com/package/pakku)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![Maintainability](https://img.shields.io/codeclimate/maintainability/zanona/pakku.svg?style=flat-square)](https://codeclimate.com/github/zanona/pakku/maintainability)
+[![Test Coverage](https://img.shields.io/codeclimate/c/zanona/pakku.svg?style=flat-square)](https://codeclimate.com/github/zanona/pakku/test_coverage)
+[![Travis CI](https://img.shields.io/travis/zanona/pakku/master.svg?style=flat-square)](https://travis-ci.org/zanona/pakku)
+[![AppVeyor](https://img.shields.io/appveyor/ci/zanona/pakku/master.svg?label=build+(win32)&style=flat-square)](https://ci.appveyor.com/project/zanona/pakku/branch/master)
+[![NPM Version](https://img.shields.io/npm/v/pakku.svg?style=flat-square)](https://npmjs.com/package/pakku)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
 
 
 A Command-line application for packing web sites and applications into a directory full of goodness and performance improvements.
