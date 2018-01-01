@@ -1,25 +1,24 @@
 {
   "name": "pakku",
-  "version": "1.4.0",
   "description": "All-in-one web bundler and compiler",
-  "keywords": [
-    "web",
-    "bundling",
-    "package",
-    "compression",
-    "html",
-    "performance",
-    "automation"
-  ],
-  "author": "Marcus Zanona <zanona@me.com>",
+  "author": "Marcus Zanona <marcus@zanona.co>",
   "homepage": "https://github.com/zanona/pakku",
-  "engines": {
-    "node": ">=6",
-    "npm": ">=5"
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zanona/pakku.git"
   },
+  "bugs": {
+    "url": "https://github.com/zanona/pakku/issues"
+  },
+  "version": "1.4.0",
   "main": "lib/index.js",
   "bin": {
     "pakku": "bin/pakku.js"
+  },
+  "scripts": {
+    "precommit": "lint-staged",
+    "test": "xo && nyc ava test/{unit,functional} -v",
+    "test:local": "xo && ava test/{unit,functional} -v"
   },
   "dependencies": {
     "autoprefixer": "^7.2.3",
@@ -44,19 +43,25 @@
   },
   "devDependencies": {
     "ava": "^0.24.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^6.0.0",
     "mock-fs": "^4.4.2",
-    "nyc": "^11.4.1"
+    "nyc": "^11.4.1",
+    "prettier-package-json": "^1.4.0",
+    "xo": "^0.18.2"
   },
-  "scripts": {
-    "test:local": "ava test/{unit,functional} -v",
-    "test": "nyc ava test/{unit,functional} -v"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:zanona/pakku.git"
-  },
-  "bugs": {
-    "url": "https://github.com/zanona/pakku/issues"
+  "keywords": [
+    "automation",
+    "bundling",
+    "compression",
+    "html",
+    "package",
+    "performance",
+    "web"
+  ],
+  "engines": {
+    "node": ">=6",
+    "npm": ">=5"
   },
   "licenses": [
     {
@@ -67,5 +72,28 @@
       "type": "MIT",
       "url": "https://github.com/zanona/pakku/blob/master/LICENSE"
     }
-  ]
+  ],
+  "lint-staged": {
+    "package.json": [
+      "prettier-package-json --write",
+      "git add"
+    ],
+    "*.js": [
+      "xo --fix",
+      "git add"
+    ]
+  },
+  "xo": {
+    "semicolon": false,
+    "rules": {
+      "complexity": [
+        "warn",
+        6
+      ],
+      "max-statements": [
+        "warn",
+        30
+      ]
+    }
+  }
 }

@@ -5,7 +5,7 @@ Pakku | パック
 [![Travis CI](https://img.shields.io/travis/zanona/pakku/master.svg?style=flat-square)](https://travis-ci.org/zanona/pakku)
 [![AppVeyor](https://img.shields.io/appveyor/ci/zanona/pakku/master.svg?label=build+(win32)&style=flat-square)](https://ci.appveyor.com/project/zanona/pakku/branch/master)
 [![NPM Version](https://img.shields.io/npm/v/pakku.svg?style=flat-square)](https://npmjs.com/package/pakku)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-XO-brightgreen.svg?style=flat-square)](https://github.com/sindresorhus/xo)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
 
 
