@@ -1,10 +1,10 @@
-const {test} = require('ava')
-const html = require('../../lib/parser/html')
+import test from 'ava'
+import html from '../../lib/parser/html'
 
-test('should strip rel atrr from expanded style tags', (t) => {
-  const content = html.setContent({
-    name: 'index.html',
-    contents: '<link data-inline rel=stylesheet href=index.less>'
-  })
-  t.false(/rel=["']?stylesheet["']?/.test(content))
+test('should strip rel atrr from expanded style tags', t => {
+	const content = html.setContent({
+		name: 'index.html',
+		contents: '<link data-inline rel=stylesheet href=index.less>'
+	})
+	t.false(/rel=["']?stylesheet["']?/.test(content))
 })
