@@ -10,7 +10,7 @@
   "bugs": {
     "url": "https://github.com/zanona/pakku/issues"
   },
-  "version": "1.4.0",
+  "version": "1.4.1",
   "main": "lib/index.js",
   "bin": {
     "pakku": "bin/pakku.js"
