@@ -24,7 +24,8 @@ exports.generateFiles = baseDir => {
 			import foo from './foo-common'
 			import bar from './bar-next'
 			import asyncFn from '../async-fn'
-			asyncFn('async').then(d => {
+
+			asyncFn('async').then(function (d) {
 				console.log(foo('hello foo'), bar('hello bar'), d)
 			})
 		`,
@@ -37,11 +38,11 @@ exports.generateFiles = baseDir => {
 			}
 		`,
 		'lib/async-fn.js': `
-			export default async function (msg) {
-				return {
+			export default function (msg) {
+				return Promise.resolve({
 					home: process.env.HOME,
 					message: msg.toUpperCase()
-				}
+				})
 			}
 		`,
 		'lib/meta/bar-next.js': `
