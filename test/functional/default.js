@@ -37,4 +37,14 @@ test('check file structure', t => {
 	})
 })
 
+test('check transpiled code', t => {
+	const cachedFiles = Object.values(t.context.cache)
+	const jsFiles = cachedFiles.filter(f => f.ext === 'js')
+	t.plan(jsFiles.length)
+	jsFiles.forEach(f => {
+		console.log(f)
+		t.truthy(f.contents)
+	})
+})
+
 test.after('cleaning up fs', mock.restore)

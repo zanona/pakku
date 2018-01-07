@@ -17,21 +17,50 @@ exports.generateFiles = baseDir => {
 		// eslint-disable-next-line camelcase
 		node_modules: nodeModules,
 		'index.html': `
-		  <link rel=stylesheet href=lib/meta/index.less>
-		  <script src=lib/meta/index.js></script>
+			<link rel=stylesheet href=lib/meta/index.less>
+			<script src=lib/meta/index.js></script>
 		`,
 		'lib/meta/index.js': `
-		  const msg = 'hello world';
-		  console.log(\`\${msg}\`);
+			import foo from './foo-common'
+			import bar from './bar-next'
+			import asyncFn from '../async-fn'
+
+			asyncFn('async').then(function (d) {
+				console.log(foo('hello foo'), bar('hello bar'), d)
+			})
+		`,
+		'lib/meta/foo-common.js': `
+			module.exports = function (msg) {
+				return {
+					home: process.env.HOME,
+					message: msg.toUpperCase()
+				}
+			}
+		`,
+		'lib/async-fn.js': `
+			export default function (msg) {
+				return Promise.resolve({
+					home: process.env.HOME,
+					message: msg.toUpperCase()
+				})
+			}
+		`,
+		'lib/meta/bar-next.js': `
+			export default function (msg) {
+				return {
+					home: process.env.HOME,
+					message: msg.toUpperCase()
+				}
+			}
 		`,
 		'lib/meta/picture.svg': `
-		  <svg viewBox='0 0 100 100' version='1.1' xmlns='http://www.w3.org/2000/svg'>
-			<circle fill='#000000' cx='50' cy='50' r='50'></circle>
-		  </svg>
+			<svg viewBox='0 0 100 100' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+				<circle fill='#000000' cx='50' cy='50' r='50'></circle>
+			</svg>
 		`,
 		'lib/meta/index.less': `
-		  @color: red;
-		  body{ background: @color url(picture.svg); }
+			@color: red;
+			body{ background: @color url(picture.svg); }
 	    `
 	}
 	return rebasePathForFiles(files, baseDir)
