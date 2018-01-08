@@ -1,38 +1,40 @@
-const {test} = require('ava'),
-      mockFsHelper = require('../mock-fs-helper.js'),
-      nodeModules  = mockFsHelper.duplicateFSInMemory('node_modules'),
-      mock   = require('mock-fs'),
-      pakku  = require('../../'),
-      files  = {
-        node_modules: nodeModules,
-        'index.html': `
-          <link rel=stylesheet href=lib/meta/index.less>
-          <script src=lib/meta/index.js></script>
-        `,
-        'lib/meta/index.js': `
-          const msg = 'hello world';
-          console.log(\`\${msg}\`);
-        `,
-        'lib/meta/index.less': `
-          @color: red;
-          body{ background: @color; }
-        `
-      };
+import fs from 'fs'
+import path from 'path'
+import mock from 'mock-fs'
+import test from 'ava'
+import pakku from '../../lib'
+import db from '../lib/files'
 
-test.before('setting up fs', mock.bind(this, files));
+const CWD = process.cwd()
+const BASE_DIR = 'src/'
+const TARGET_FILE = path.join(BASE_DIR, 'index.html')
+const BUILD_DIR = 'build'
 
-test.cb('check for built files', (t) => {
-  pakku('index.html', 'build', {sourcemaps: true})
-    .on('after_build', (cache) => {
-      console.log(cache.map((f) => f.name));
-      const file = cache.find((f) => f.name === 'index.html');
-      t.true(file.done);
-      t.end();
-    })
-    .on('fatal', t.end);
-});
+let cache
 
-test.after('cleaning up fs', () => {
-  console.log('cleaning up');
-  mock.restore();
-});
+test.before('setting up fs', mock.bind(this, db.generateFiles(BASE_DIR)))
+test.cb.before('running pakku', t => {
+	pakku(TARGET_FILE, BUILD_DIR, {sourcemaps: true})
+    .on('after_build', c => {
+	cache = c
+	t.end()
+})
+    .on('fatal', t.end)
+})
+test.beforeEach(t => {
+	t.context.cache = cache
+})
+
+test.cb('check for target build directory', t => {
+	fs.stat(`${CWD}/${BUILD_DIR}`, t.end)
+})
+
+test('check file structure', t => {
+	const cachedFiles = Object.values(t.context.cache)
+	t.plan(cachedFiles.length)
+	cachedFiles.forEach(({vname}) => {
+		t.notThrows(fs.statSync.bind(this, `${BUILD_DIR}/${vname}`))
+	})
+})
+
+test.after('cleaning up fs', mock.restore)

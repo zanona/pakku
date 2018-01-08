@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.1"></a>
+## [1.4.1](https://github.com/zanona/pakku/compare/v1.4.0...v1.4.1) (2018-01-03)
+
+
+### Bug Fixes
+
+* **build:** build dir created in relation target file and not pwd ([#25](https://github.com/zanona/pakku/issues/25)) ([63fa54c](https://github.com/zanona/pakku/commit/63fa54c))
+* **parser/html:** remove rel attr from inlined styles ([#22](https://github.com/zanona/pakku/issues/22)) ([c30c5df](https://github.com/zanona/pakku/commit/c30c5df))
+
+
+
 <a name="1.4.0"></a>
 # [1.4.0](https://github.com/zanona/pakku/compare/v1.3.1...v1.4.0) (2017-12-03)
 
