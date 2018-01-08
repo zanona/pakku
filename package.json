@@ -37,7 +37,7 @@
     "imagemin-svgo": "^6.0.0",
     "less": "^2.7.3",
     "marked": "^0.3.9",
-    "postcss": "^6.0.14",
+    "postcss": "^6.0.16",
     "postcss-flexbugs-fixes": "^3.2.0",
     "uglify-js": "^3.3.4"
   },
