@@ -39,7 +39,7 @@
     "marked": "^0.3.12",
     "postcss": "^6.0.16",
     "postcss-flexbugs-fixes": "^3.3.0",
-    "uglify-js": "^3.3.8"
+    "uglify-js": "^3.3.10"
   },
   "devDependencies": {
     "ava": "^0.24.0",
