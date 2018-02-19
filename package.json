@@ -36,7 +36,7 @@
     "imagemin-pngquant": "^5.0.1",
     "imagemin-svgo": "^6.0.0",
     "less": "^2.7.3",
-    "marked": "^0.3.12",
+    "marked": "^0.3.15",
     "postcss": "^6.0.16",
     "postcss-flexbugs-fixes": "^3.3.0",
     "uglify-js": "^3.3.8"
