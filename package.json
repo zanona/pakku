@@ -27,7 +27,7 @@
     "babel-preset-stage-3": "^6.24.1",
     "babelify": "^8.0.0",
     "batch-promises": "^0.0.3",
-    "browserify": "^15.2.0",
+    "browserify": "^16.1.1",
     "clean-css": "^4.1.9",
     "filendir": "^1.0.0",
     "html-minifier": "^3.5.8",
