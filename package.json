@@ -48,7 +48,7 @@
     "mock-fs": "^4.4.2",
     "nyc": "^11.4.1",
     "prettier-package-json": "^1.4.0",
-    "xo": "^0.18.2"
+    "xo": "^0.21.0"
   },
   "keywords": [
     "automation",
