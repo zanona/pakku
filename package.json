@@ -31,7 +31,7 @@
     "clean-css": "^4.1.9",
     "filendir": "^1.0.0",
     "html-minifier": "^3.5.8",
-    "imagemin": "^5.3.1",
+    "imagemin": "^6.0.0",
     "imagemin-jpegtran": "^5.0.2",
     "imagemin-pngquant": "^5.0.1",
     "imagemin-svgo": "^6.0.0",
