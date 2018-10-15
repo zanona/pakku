@@ -46,7 +46,7 @@
     "husky": "^0.14.3",
     "lint-staged": "^6.0.1",
     "mock-fs": "^4.4.2",
-    "nyc": "^11.4.1",
+    "nyc": "^13.1.0",
     "prettier-package-json": "^1.4.0",
     "xo": "^0.18.2"
   },
