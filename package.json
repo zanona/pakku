@@ -25,7 +25,7 @@
     "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-3": "^6.24.1",
-    "babelify": "^8.0.0",
+    "babelify": "^10.0.0",
     "batch-promises": "^0.0.3",
     "browserify": "^15.2.0",
     "clean-css": "^4.1.9",
